@@ -1,0 +1,32 @@
+{
+    "name": "descentDSNclient",
+    "version": "0.1.0",
+    "description": "The client portion of the Descent Dedicated Server Network.",
+    "homepage": "https://github.com/roncli/descentDSNclient",
+    "bugs": {
+        "url": "https://github.com/roncli/descentDSNclient/issues",
+        "email": "roncli@roncli.com"
+    },
+    "license": "MIT",
+    "author": {
+        "name": "Ronald M. Clifford",
+        "email": "roncli@roncli.com",
+        "url": "http://www.roncli.com"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/roncli/descentDSNclient.git"
+    },
+    "dependencies": {
+        "descent3console": "0.1.1",
+        "descent3launcher": "0.1.2",
+        "express": "4.13.0",
+        "handlebars": "3.0.3",
+        "ws": "0.7.2"
+    },
+    "devDependencies": {},
+    "engines": {
+        "node": ">=0.12.4"
+    },
+    "private": false
+}
