@@ -16,6 +16,14 @@ app.use(function(req, res, next) {
 
 app.use(express.static("public"));
 
+app.get("/quit", function(req, res) {
+    "use strict";
+
+    res.status(200).send("Descent DSN has been force quit.  You should close all other running Descent 3 servers manually.");
+
+    process.exit();
+});
+
 app.listen(20920);
 
 // Setup web sockets.
