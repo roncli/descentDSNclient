@@ -1,5 +1,5 @@
 /*jslint browser: true*/
-/*global $, WebSocket*/
+/*global $, WebSocket, angular*/
 
 var createWebsocketClient = function() {
     "use strict";
@@ -39,3 +39,30 @@ $(document).ready(function() {
 
     createWebsocketClient();
 });
+
+// Set up Angular application.
+var app = angular.module("ddsn", []);
+
+app.directive("serverTabs", function() {
+    "use strict";
+
+    return {
+        restrict: "E",
+        templateUrl: "/templates/server-tabs.htm"
+    };
+});
+
+app.controller("ddsn", ["$scope", function($scope) {
+    "use strict";
+
+    $scope.servers = [
+        {
+            gameName: "Descent 3 Dedicated Server",
+            port: 2092
+        },
+        {
+            gameName: "Descent 3 Dedicated Server",
+            port: 2093
+        }
+    ];
+}]);

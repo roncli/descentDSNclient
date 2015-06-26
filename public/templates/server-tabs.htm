@@ -1,0 +1,17 @@
+<ul class="nav nav-pills">
+    <li role="presentation">
+        <button id="news" class="btn btn-primary"><span class="glyphicon glyphicon-home"></span> News</button>
+    </li>
+    <li role="presentation">
+        <button id="dashboard" class="btn btn-primary"><span class="glyphicon glyphicon-dashboard"></span> Dashboard</button>
+    </li>
+    <li role="presentation" ng-repeat="server in servers">
+        <button class="btn btn-primary server" data-id="{{server.port}}">{{server.gameName}} <span class="glyphicon glyphicon-arrow-right"></span> {{server.port}}</button>
+    </li>
+    <li role="presentation">
+        <button id="addserver" class="btn btn-primary"><span class="glyphicon glyphicon-plus"></span> Add Server</button>
+    </li>
+    <li role="presentation">
+        <button id="settings" class="btn btn-primary"><span class="glyphicon glyphicon-cog"></span> Settings</button>
+    </li>
+</ul>

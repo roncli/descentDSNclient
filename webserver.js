@@ -22,7 +22,7 @@ module.exports = function() {
         });
 
         // Allow for static content in the public directory.
-        app.use(express.static("public"));
+        app.use(express.static("public", {index: "index.htm"}));
 
         // Force quit Descent DSN entirely.
         app.get("/quit", function(req, res) {
