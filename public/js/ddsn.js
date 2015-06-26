@@ -1,16 +1,27 @@
 /*jslint browser: true*/
 /*global $, WebSocket*/
-$(document).ready(function() {
+
+var createWebsocketClient = function() {
     "use strict";
 
-    var ws = new WebSocket("ws://localhost:20921");
+    var ws = new WebSocket("ws://localhost:20921"),
+        connected = false;
 
     ws.onopen = function() {
-        // TODO: Request initialization data.
+        ws.send(JSON.stringify({
+            message: "initialize"
+        }));
+        connected = true;
     };
 
     ws.onclose = function() {
-        // TODO: Shut down the web page.
+        // If the server shut down, attempt to reconnect once.
+        console.log("Closed.");
+        if (connected) {
+            setTimeout(function() {
+                createWebsocketClient();
+            }, 1000);
+        }
     };
 
     ws.onmessage = function(ev) {
@@ -19,5 +30,12 @@ $(document).ready(function() {
 
     ws.onerror = function(ev) {
         // TODO: Display error and shut down the web page.
+        console.log("An error occurred.", ev);
     };
+};
+
+$(document).ready(function() {
+    "use strict";
+
+    createWebsocketClient();
 });

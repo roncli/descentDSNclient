@@ -1,40 +1,65 @@
-var express = require("express"),
-    app = express(),
-    WebSocket = require("ws"),
-    wss = new WebSocket.Server({port: 20921});
+var cluster = require("cluster"),
+    webserver = require("./webserver"),
+    websocket = require("./websocket"),
+    webServerWorker, webSocketWorker;
 
-// Setup web server.
-app.use(function(req, res, next) {
-    "use strict";
+// Use clustering to spawn separate processes.
+if (cluster.isMaster) {
+    webServerWorker = cluster.fork({
+        ddsnJob: "webserver"
+    });
+    webSocketWorker = cluster.fork({
+        ddsnJob: "websocket"
+    });
 
-    if (req.headers.host === "localhost:20920") {
-        next();
-    } else {
-        res.status(404).send("Not found");
+    cluster.on("disconnect", function(worker) {
+        "use strict";
+
+        if (worker.suicide) {
+            // Worker was intentionally disconnected, end the application.
+            if (webServerWorker.isConnected()) {
+                webServerWorker.kill();
+            }
+            if (webSocketWorker.isConnected()) {
+                webSocketWorker.kill();
+            }
+            process.exit();
+        } else {
+            // Worker was unintentionally disconnected, restart any disconnected workers.
+            if (!webServerWorker.isConnected()) {
+                webServerWorker = cluster.fork({
+                    ddsnJob: "webserver"
+                });
+            }
+            if (!webSocketWorker.isConnected()) {
+                webSocketWorker = cluster.fork({
+                    ddsnJob: "websocket"
+                });
+            }
+        }
+    });
+
+    cluster.on("exit", function() {
+        "use strict";
+
+        if (!webServerWorker.isConnected()) {
+            webServerWorker = cluster.fork({
+                ddsnJob: "webserver"
+            });
+        }
+        if (!webSocketWorker.isConnected()) {
+            webSocketWorker = cluster.fork({
+                ddsnJob: "websocket"
+            });
+        }
+    });
+} else {
+    switch (process.env.ddsnJob) {
+        case "webserver":
+            webserver();
+            break;
+        case "websocket":
+            websocket();
+            break;
     }
-});
-
-app.use(express.static("public"));
-
-app.get("/quit", function(req, res) {
-    "use strict";
-
-    res.status(200).send("Descent DSN has been force quit.  You should close all other running Descent 3 servers manually.");
-
-    process.exit();
-});
-
-app.listen(20920);
-
-// Setup web sockets.
-wss.on("connection", function(ws) {
-    "use strict";
-
-    ws.on("message", function(ev) {
-        // TODO: Handle message.
-    });
-
-    ws.on("error", function(ev) {
-        // TODO: Handle error.
-    });
-});
+}
