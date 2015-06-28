@@ -1,0 +1,7 @@
+.input-group-addon:first-child {
+    border-left: none;
+}
+
+.input-group-addon:last-child {
+    border-right: none;
+}

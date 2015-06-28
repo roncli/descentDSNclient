@@ -151,6 +151,20 @@ var app = angular.module("ddsn", []),
             data.settingsMenuTab = screen;
         };
 
+        $scope.updateAddServerServerPort = function() {
+            data.settings.addServer.server.portValid = typeof data.settings.addServer.server.port === "number" && data.settings.addServer.server.port >= 0 && data.settings.addServer.server.port <= 65535 && data.settings.addServer.server.port % 1 === 0;
+            data.settings.addServer.server.portsDiffer = data.settings.addServer.server.port !== data.settings.addServer.server.gamespyport;
+        };
+
+        $scope.updateAddServerServerGamespyport = function() {
+            data.settings.addServer.server.gamespyportValid = typeof data.settings.addServer.server.gamespyport === "number" && data.settings.addServer.server.gamespyport >= 0 && data.settings.addServer.server.gamespyport <= 65535 && data.settings.addServer.server.gamespyport % 1 === 0;
+            data.settings.addServer.server.portsDiffer = data.settings.addServer.server.port !== data.settings.addServer.server.gamespyport;
+        };
+
+        $scope.updateAddServerServerFramerate = function() {
+            data.settings.addServer.server.framerateValid = typeof data.settings.addServer.server.framerate === "number" && data.settings.addServer.server.framerate >= 1 && data.settings.addServer.server.framerate <= 999 && data && data.settings.addServer.server.framerate % 1 === 0;
+        };
+
         $scope.updateSettingsDescent3Path = function() {
             ws.send(JSON.stringify({
                 message: "settings.descent3.path",

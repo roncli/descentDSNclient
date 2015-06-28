@@ -4,6 +4,7 @@ var cluster = require("cluster"),
     fs = require("fs"),
     path = require("path"),
     os = require("os"),
+    net = require("net"),
     Launcher = require("descent3launcher");
 
 module.exports = function() {
@@ -70,8 +71,12 @@ module.exports = function() {
                             }
 
                             // Get default settings.
-                            settings.default = Launcher.defaultOptions;
-                            settings.addServer = Launcher.defaultOptions;
+                            settings.default = JSON.parse(JSON.stringify(Launcher.defaultOptions));
+                            settings.default.server.portValid = true;
+                            settings.default.server.gamespyportValid = true;
+                            settings.default.server.portsDiffer = true;
+                            settings.default.server.framerateValid = true;
+                            settings.addServer = JSON.parse(JSON.stringify(settings.default));
 
                             // Get network interfaces.
                             settings.interfaces = [];
