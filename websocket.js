@@ -3,7 +3,8 @@ var cluster = require("cluster"),
     WebSocket = require("ws"),
     fs = require("fs"),
     path = require("path"),
-    os = require("os");
+    os = require("os"),
+    Launcher = require("descent3launcher");
 
 module.exports = function() {
     "use strict";
@@ -49,11 +50,37 @@ module.exports = function() {
                     case "initialize":
                         // Read in settings JSON.
                         fs.exists("./settings.json", function(exists) {
+                            var interfaces = os.networkInterfaces(),
+                                key,
+
+                                addInterface = function(network) {
+                                    if (network.family === "IPv4") {
+                                        settings.interfaces.push({
+                                            name: key,
+                                            ip: network.address
+                                        });
+                                    }
+                                };
+
+                            // Get saved settings.
                             if (exists) {
                                 settings = require("./settings.json");
                             } else {
                                 settings = {};
                             }
+
+                            // Get default settings.
+                            settings.default = Launcher.defaultOptions;
+                            settings.addServer = Launcher.defaultOptions;
+
+                            // Get network interfaces.
+                            settings.interfaces = [];
+                            for (key in interfaces) {
+                                if (interfaces.hasOwnProperty(key)) {
+                                    interfaces[key].forEach(addInterface);
+                                }
+                            }
+
                             ws.send(JSON.stringify({
                                 message: "settings",
                                 settings: settings

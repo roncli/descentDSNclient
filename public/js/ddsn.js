@@ -4,6 +4,7 @@
 var app = angular.module("ddsn", []),
     data = {
         serverTab: "news",
+        addServerMenuTab: "saved",
         settingsMenuTab: "descent3",
         settings: {
             descent3: {
@@ -73,6 +74,48 @@ var app = angular.module("ddsn", []),
         };
     });
 
+    app.directive("addServerSaved", function() {
+        return {
+            restrict: "E",
+            templateUrl: "/templates/add-server-saved.htm"
+        };
+    });
+
+    app.directive("addServerServer", function() {
+        return {
+            restrict: "E",
+            templateUrl: "/templates/add-server-server.htm"
+        };
+    });
+
+    app.directive("addServerGame", function() {
+        return {
+            restrict: "E",
+            templateUrl: "/templates/add-server-game.htm"
+        };
+    });
+
+    app.directive("addServerAllowed", function() {
+        return {
+            restrict: "E",
+            templateUrl: "/templates/add-server-allowed.htm"
+        };
+    });
+
+    app.directive("addServerModifications", function() {
+        return {
+            restrict: "E",
+            templateUrl: "/templates/add-server-modifications.htm"
+        };
+    });
+
+    app.directive("addServerLaunch", function() {
+        return {
+            restrict: "E",
+            templateUrl: "/templates/add-server-launch.htm"
+        };
+    });
+
     app.directive("settingsDescent3", function() {
         return {
             restrict: "E",
@@ -94,14 +137,18 @@ var app = angular.module("ddsn", []),
             $("button.server-tab").removeClass("btn-success").addClass("btn-primary");
             $(ev.currentTarget).removeClass("btn-primary").addClass("btn-success");
             data.serverTab = screen;
-            //scope.$apply();
+        };
+
+        $scope.openAddServer = function(ev, screen) {
+            $("button.add-server-menu-tab").removeClass("btn-success").addClass("btn-primary");
+            $(ev.currentTarget).removeClass("btn-primary").addClass("btn-success");
+            data.addServerMenuTab = screen;
         };
 
         $scope.openSettings = function(ev, screen) {
             $("button.settings-menu-tab").removeClass("btn-success").addClass("btn-primary");
             $(ev.currentTarget).removeClass("btn-primary").addClass("btn-success");
             data.settingsMenuTab = screen;
-            //scope.$apply();
         };
 
         $scope.updateSettingsDescent3Path = function() {

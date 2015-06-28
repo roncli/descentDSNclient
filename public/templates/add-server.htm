@@ -1,20 +1,26 @@
 <ul class="nav nav-pills">
     <li role="presentation">
-        <button class="btn btn-success"><span class="glyphicon glyphicon-hdd"></span> Saved Servers</button>
+        <button class="add-server-menu-tab btn btn-success saved" ng-click="openAddServer($event, 'saved')"><span class="glyphicon glyphicon-hdd"></span> Saved Servers</button>
     </li>
     <li role="presentation">
-        <button class="btn btn-primary"><span class="glyphicon glyphicon-wrench"></span> Server Options</button>
+        <button class="add-server-menu-tab btn btn-primary server" ng-click="openAddServer($event, 'server')"><span class="glyphicon glyphicon-wrench"></span> Server Options</button>
     </li>
     <li role="presentation">
-        <button class="btn btn-primary"><span class="glyphicon glyphicon-th-list"></span> Game Options</button>
+        <button class="add-server-menu-tab btn btn-primary game" ng-click="openAddServer($event, 'game')"><span class="glyphicon glyphicon-th-list"></span> Game Options</button>
     </li>
     <li role="presentation">
-        <button class="btn btn-primary"><span class="glyphicon glyphicon-ok"></span> Allowed Objects</button>
+        <button class="add-server-menu-tab btn btn-primary allowed" ng-click="openAddServer($event, 'allowed')"><span class="glyphicon glyphicon-ok"></span> Allowed Objects</button>
     </li>
     <li role="presentation">
-        <button class="btn btn-primary"><span class="glyphicon glyphicon-tasks"></span> Modifications</button>
+        <button class="add-server-menu-tab btn btn-primary modifications" ng-click="openAddServer($event, 'modifications')"><span class="glyphicon glyphicon-tasks"></span> Modifications</button>
     </li>
     <li role="presentation">
-        <button class="btn btn-primary"><span class="glyphicon glyphicon-share"></span> Launch Server</button>
+        <button class="add-server-menu-tab btn btn-primary launch" ng-click="openAddServer($event, 'launch')"><span class="glyphicon glyphicon-share"></span> Launch Server</button>
     </li>
-</ul>
+</ul><br />
+<add-server-saved ng-if="data.addServerMenuTab === 'saved'"></add-server-saved>
+<add-server-server ng-if="data.addServerMenuTab === 'server'"></add-server-server>
+<add-server-game ng-if="data.addServerMenuTab === 'game'"></add-server-game>
+<add-server-allowed ng-if="data.addServerMenuTab === 'allowed'"></add-server-allowed>
+<add-server-modifications ng-if="data.addServerMenuTab === 'modifications'"></add-server-modifications>
+<add-server-launch ng-if="data.addServerMenuTab === 'launch'"></add-server-launch>

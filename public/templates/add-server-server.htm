@@ -1,0 +1,33 @@
+<div class="input-group">
+    <span class="input-group-addon" style="white-space: nowrap; width: 1px;">IP address:</span>
+    <span class="input-group-addon" style="width: 100%; padding: 0;">
+        <select class="form-control" ng-model="data.settings.addServer.server.ip">
+            <option value="">Default</option>
+            <option ng-repeat="network in data.settings.interfaces" value="{{network.ip}}">{{network.ip}} - {{network.name}}</option>
+        </select>
+    </span>
+</div>
+<div class="input-group">
+    <span class="input-group-addon">Server port:</span>
+    <input type="number" min="0" max="65535" class="form-control" placeholder="Port between 0 and 65535" ng-model="data.settings.addServer.server.port" ng-blur="updateAddServerServerPort()" />
+</div>
+<div class="input-group">
+    <span class="input-group-addon">GameSpy port:</span>
+    <input type="number" min="0" max="65535" class="form-control" placeholder="GameSpy port between 0 and 65535" ng-model="data.settings.addServer.server.gamespyport" ng-blur="updateAddServerServerGamespyport()" />
+</div>
+<div class="input-group">
+    <span class="input-group-addon">Server framerate:</span>
+    <input type="number" min="1" max="999" class="form-control" placeholder="Frames per second between 1 and 999" ng-model="data.settings.addServer.server.framerate" ng-blur="updateAddServerServerFramerate()" />
+</div>
+<div class="input-group">
+    <span class="input-group-addon" style="white-space: nowrap; width: 1px;">Ship logos and audio taunts:</span>
+    <span class="input-group-addon" style="width: 100%; text-align: left;">
+        <input type="checkbox" ng-model="data.settings.addServer.server.noMultiBmp" ng-true-value="false" ng-false-value="true" />
+    </span>
+</div>
+<div class="input-group">
+    <span class="input-group-addon" style="white-space: nowrap; width: 1px;">Use player messages:</span>
+    <span class="input-group-addon" style="width: 100%; text-align: left;">
+        <input type="checkbox" ng-model="data.settings.addServer.server.playerMessages" />
+    </span>
+</div>
