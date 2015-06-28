@@ -31,3 +31,6 @@ test.js
 
 # PHP Storm
 .idea
+
+# DDSN settings
+settings.json

@@ -1,4 +1,4 @@
-<html ng-app="ddsn">
+<html ng-app="ddsn" ng-controller="ddsn">
 <head>
     <script src="/js/jquery-2.1.4.min.js"></script>
     <script src="/js/bootstrap-3.3.5.min.js"></script>
@@ -6,14 +6,19 @@
     <script src="/js/ddsn.js"></script>
     <link rel="stylesheet" href="/css/bootstrap-slate-3.3.5.min.css" />
 </head>
-<body ng-controller="ddsn">
+<body>
     <div class="jumbotron text-center">
         <h1>Descent DSN</h1>
     </div>
-    <div id="content">
-        <server-tabs></server-tabs>
-        <ul id="menu-tabs" class="nav nav-pills"></ul>
-        <div id="feature"></div>
+    <div class="container-fluid">
+        <div class="col-xs-12">
+            <offline ng-if="data.offline"></offline>
+            <error ng-if="data.error"></error>
+            <div ng-if="!data.offline && !data.error">
+                <server-tabs></server-tabs><br />
+                <content></content>
+            </div>
+        </div>
     </div>
 </body>
 </html>

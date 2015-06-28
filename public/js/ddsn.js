@@ -1,68 +1,163 @@
 /*jslint browser: true*/
 /*global $, WebSocket, angular*/
 
-var createWebsocketClient = function() {
-    "use strict";
-
-    var ws = new WebSocket("ws://localhost:20921"),
-        connected = false;
-
-    ws.onopen = function() {
-        ws.send(JSON.stringify({
-            message: "initialize"
-        }));
-        connected = true;
-    };
-
-    ws.onclose = function() {
-        // If the server shut down, attempt to reconnect once.
-        console.log("Closed.");
-        if (connected) {
-            setTimeout(function() {
-                createWebsocketClient();
-            }, 1000);
+var app = angular.module("ddsn", []),
+    data = {
+        serverTab: "news",
+        settingsMenuTab: "descent3",
+        settings: {
+            descent3: {
+                pathValid: false
+            }
         }
     };
 
-    ws.onmessage = function(ev) {
-        // TODO: Handle message.
-    };
-
-    ws.onerror = function(ev) {
-        // TODO: Display error and shut down the web page.
-        console.log("An error occurred.", ev);
-    };
-};
-
-$(document).ready(function() {
+(function() {
     "use strict";
 
-    createWebsocketClient();
-});
+    var ws, scope;
 
-// Set up Angular application.
-var app = angular.module("ddsn", []);
+    app.directive("offline", function() {
+        return {
+            restrict: "E",
+            templateUrl: "/templates/offline.htm"
+        };
+    });
 
-app.directive("serverTabs", function() {
-    "use strict";
+    app.directive("error", function() {
+        return {
+            restrict: "E",
+            templateUrl: "/templates/error.htm"
+        };
+    });
 
-    return {
-        restrict: "E",
-        templateUrl: "/templates/server-tabs.htm"
-    };
-});
+    app.directive("serverTabs", function() {
+        return {
+            restrict: "E",
+            templateUrl: "/templates/server-tabs.htm"
+        };
+    });
 
-app.controller("ddsn", ["$scope", function($scope) {
-    "use strict";
+    app.directive("content", function() {
+        return {
+            restrict: "E",
+            templateUrl: "/templates/content.htm"
+        };
+    });
 
-    $scope.servers = [
-        {
-            gameName: "Descent 3 Dedicated Server",
-            port: 2092
-        },
-        {
-            gameName: "Descent 3 Dedicated Server",
-            port: 2093
-        }
-    ];
-}]);
+    app.directive("news", function() {
+        return {
+            restrict: "E",
+            templateUrl: "/templates/news.htm"
+        };
+    });
+
+    app.directive("dashboard", function() {
+        return {
+            restrict: "E",
+            templateUrl: "/templates/dashboard.htm"
+        };
+    });
+
+    app.directive("addServer", function() {
+        return {
+            restrict: "E",
+            templateUrl: "/templates/add-server.htm"
+        };
+    });
+
+    app.directive("settings", function() {
+        return {
+            restrict: "E",
+            templateUrl: "/templates/settings.htm"
+        };
+    });
+
+    app.directive("settingsDescent3", function() {
+        return {
+            restrict: "E",
+            templateUrl: "/templates/settings-descent3.htm"
+        };
+    });
+
+    app.directive("settingsModifications", function() {
+        return {
+            restrict: "E",
+            templateUrl: "/templates/settings-modifications.htm"
+        };
+    });
+
+    app.controller("ddsn", ["$scope", function($scope) {
+        $scope.data = data;
+
+        $scope.openMenu = function(ev, screen) {
+            $("button.server-tab").removeClass("btn-success").addClass("btn-primary");
+            $(ev.currentTarget).removeClass("btn-primary").addClass("btn-success");
+            data.serverTab = screen;
+            //scope.$apply();
+        };
+
+        $scope.openSettings = function(ev, screen) {
+            $("button.settings-menu-tab").removeClass("btn-success").addClass("btn-primary");
+            $(ev.currentTarget).removeClass("btn-primary").addClass("btn-success");
+            data.settingsMenuTab = screen;
+            //scope.$apply();
+        };
+
+        $scope.updateSettingsDescent3Path = function() {
+            ws.send(JSON.stringify({
+                message: "settings.descent3.path",
+                path: data.settings.descent3.path
+            }));
+        };
+    }]);
+
+    $(document).ready(function() {
+        var createWebsocketClient = function() {
+            var connected = false;
+            ws = new WebSocket("ws://localhost:20921");
+
+            ws.onopen = function() {
+                ws.send(JSON.stringify({
+                    message: "initialize"
+                }));
+                connected = true;
+            };
+
+            ws.onclose = function() {
+                if (connected) {
+                    // If the server shut down, attempt to reconnect once.
+                    setTimeout(function() {
+                        createWebsocketClient();
+                    }, 1000);
+                } else {
+                    data.offline = true;
+                    scope.$apply();
+                }
+            };
+
+            ws.onmessage = function(ev) {
+                var message = JSON.parse(ev.data),
+                    key;
+
+                switch (message.message) {
+                    case "settings":
+                        for (key in message.settings) {
+                            if (message.settings.hasOwnProperty(key)) {
+                                data.settings[key] = message.settings[key];
+                            }
+                        }
+                        scope.$apply();
+                        break;
+                    case "settings.descent3.pathValid":
+                        data.settings.descent3.pathValid = message.valid;
+                        scope.$apply();
+                        break;
+                }
+            };
+        };
+
+        scope = angular.element("html").scope();
+        createWebsocketClient();
+    });
+}());

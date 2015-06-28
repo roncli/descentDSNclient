@@ -1,0 +1,5 @@
+<div ng-class="{true: 'input-group', false: 'input-group has-error'}[data.settings.descent3.pathValid]">
+    <span class="input-group-addon">Enter the path to your Descent 3 folder:</span>
+    <input class="form-control" placeholder="Your Descent 3 folder" type="text" ng-model="data.settings.descent3.path" ng-blur="updateSettingsDescent3Path()" />
+</div>
+<div class="alert alert-danger" role="alert" ng-if="!data.settings.descent3.pathValid"><span class="glyphicon glyphicon-alert"></span> Could not find Descent 3 in the directory specified.</div>

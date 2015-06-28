@@ -1,17 +1,17 @@
 <ul class="nav nav-pills">
     <li role="presentation">
-        <button id="news" class="btn btn-primary"><span class="glyphicon glyphicon-home"></span> News</button>
+        <button class="server-tab btn btn-success" ng-click="openMenu($event, 'news')"><span class="glyphicon glyphicon-home"></span> News</button>
+    </li>
+    <li role="presentation" ng-if="data.settings.descent3.pathValid">
+        <button class="server-tab btn btn-primary" ng-click="openMenu($event, 'dashboard')"><span class="glyphicon glyphicon-dashboard"></span> Dashboard</button>
+    </li>
+    <li role="presentation" ng-if="data.settings.descent3.pathValid" ng-repeat="server in data.servers">
+        <button class="server-tab btn btn-primary server" ng-click="openServer($event, server.port)">{{server.gameName}} <span class="glyphicon glyphicon-arrow-right"></span> {{server.port}}</button>
+    </li>
+    <li role="presentation" ng-if="data.settings.descent3.pathValid">
+        <button class="server-tab btn btn-primary" ng-click="openMenu($event, 'addServer')"><span class="glyphicon glyphicon-plus"></span> Add Server</button>
     </li>
     <li role="presentation">
-        <button id="dashboard" class="btn btn-primary"><span class="glyphicon glyphicon-dashboard"></span> Dashboard</button>
-    </li>
-    <li role="presentation" ng-repeat="server in servers">
-        <button class="btn btn-primary server" data-id="{{server.port}}">{{server.gameName}} <span class="glyphicon glyphicon-arrow-right"></span> {{server.port}}</button>
-    </li>
-    <li role="presentation">
-        <button id="addserver" class="btn btn-primary"><span class="glyphicon glyphicon-plus"></span> Add Server</button>
-    </li>
-    <li role="presentation">
-        <button id="settings" class="btn btn-primary"><span class="glyphicon glyphicon-cog"></span> Settings</button>
+        <button class="server-tab btn btn-primary" ng-click="openMenu($event, 'settings')"><span class="glyphicon glyphicon-cog"></span> Settings</button>
     </li>
 </ul>
