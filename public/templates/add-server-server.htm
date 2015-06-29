@@ -30,7 +30,53 @@
     <span class="input-group-addon" style="width: 100%; text-align: left;">
         <input type="checkbox" ng-model="data.settings.addServer.server.playerMessages" />
     </span>
-</div><br/>
+</div><br />
+<table class="table table-hover table-condensed">
+    <tr>
+        <th colspan="4" class="text-center">Broadcast to these GameSpy Trackers:</th>
+    </tr>
+    <tr>
+        <th>Region</th>
+        <th>Server</th>
+        <th>Port</th>
+        <th></th>
+    </tr>
+    <tr ng-repeat="tracker in data.settings.addServer.server.trackers">
+        <td>{{getRegionName(tracker.region)}}</td>
+        <td>{{tracker.server}}</td>
+        <td>{{tracker.port}}</td>
+        <td><button class="btn btn-xs btn-danger" ng-click="addServerServerRemoveTracker($index)">Remove</button></td>
+    </tr>
+    <tr>
+        <th colspan="4" class="text-center">Add Other GameSpy Trackers:</th>
+    </tr>
+    <tr>
+        <td ng-class="{true: '', false: 'has-error'}[data.settings.addServer.server.addTrackerRegionValid]">
+            <select class="form-control" ng-model="data.settings.addServer.server.addTrackerRegion" convert-to-number ng-change="updateAddServerServerTrackerRegion()">
+                <option value="0">None</option>
+                <option value="1">Southeast US</option>
+                <option value="2">Western US</option>
+                <option value="3">Midwest US</option>
+                <option value="4">Northwest US & Western Canada</option>
+                <option value="5">Northeast US & Eastern Canada</option>
+                <option value="6">United Kingdom</option>
+                <option value="7">Continental Europe</option>
+                <option value="8">Central Asia & Middle East</option>
+                <option value="9">Southeast Asia & Pacific</option>
+                <option value="10">Africa</option>
+                <option value="11">Australia & New Zealand</option>
+                <option value="12">Central America & South America</option>
+            </select>
+        </td>
+        <td ng-class="{true: '', false: 'has-error'}[data.settings.addServer.server.addTrackerServerValid]">
+            <input type="text" class="form-control" placeholder="GameSpy server address" size="25" ng-model="data.settings.addServer.server.addTrackerServer" ng-blur="updateAddServerServerTrackerServer()" />
+        </td>
+        <td ng-class="{true: '', false: 'has-error'}[data.settings.addServer.server.addTrackerPortValid]">
+            <input type="number" min="0" max="65535" class="form-control" placeholder="Port" size="6" maxlength="5" ng-model="data.settings.addServer.server.addTrackerPort" ng-blur="updateAddServerServerTrackerPort()" />
+        </td>
+        <td><button class="btn btn-xs btn-success" ng-click="addServerServerAddTracker()" ng-disabled="!data.settings.addServer.server.addTrackerServerValid || !data.settings.addServer.server.addTrackerPortValid">Add</button></td>
+    </tr>
+</table><br/>
 <div class="alert alert-danger" role="alert" ng-if="!data.settings.addServer.server.portValid"><span class="glyphicon glyphicon-alert"></span> You must enter a valid port between 0 and 65535.</div>
 <div class="alert alert-danger" role="alert" ng-if="!data.settings.addServer.server.gamespyportValid"><span class="glyphicon glyphicon-alert"></span> You must enter a valid GameSpy port between 0 and 65535.</div>
 <div class="alert alert-danger" role="alert" ng-if="!data.settings.addServer.server.portsDiffer"><span class="glyphicon glyphicon-alert"></span> Port and GameSpy port must be different.</div>

@@ -18,6 +18,20 @@ var app = angular.module("ddsn", []),
 
     var ws, scope;
 
+    app.directive("convertToNumber", function() {
+        return {
+            require: "ngModel",
+            link: function(scope, element, attrs, ngModel) {
+                ngModel.$parsers.push(function(val) {
+                    return +val;
+                });
+                ngModel.$formatters.push(function(val) {
+                    return val ? val.toString() : "";
+                });
+            }
+        };
+    });
+
     app.directive("offline", function() {
         return {
             restrict: "E",
@@ -133,6 +147,53 @@ var app = angular.module("ddsn", []),
     app.controller("ddsn", ["$scope", function($scope) {
         $scope.data = data;
 
+        $scope.getRegionName = function(regionId) {
+            switch (regionId) {
+                case 0:
+                    return "None";
+                case 1:
+                    return "Southeast US";
+                case 2:
+                    return "Western US";
+                case 3:
+                    return "Midwest US";
+                case 4:
+                    return "Northwest US & Western Canada";
+                case 5:
+                    return "Northeast US & Eastern Canada";
+                case 6:
+                    return "United Kingdom";
+                case 7:
+                    return "Continental Europe";
+                case 8:
+                    return "Central Asia & Middle East";
+                case 9:
+                    return "Southeast Asia & Pacific";
+                case 10:
+                    return "Africa";
+                case 11:
+                    return "Australia & New Zealand";
+                case 12:
+                    return "Central America & South America";
+                default:
+                    return "Unknown";
+            }
+        };
+
+        $scope.addServerServerRemoveTracker = function(index) {
+            data.settings.addServer.server.trackers.splice(index, 1);
+        };
+
+        $scope.addServerServerAddTracker = function() {
+            data.settings.addServer.server.trackers.push({
+                region: data.settings.addServer.server.addTrackerRegion,
+                server: data.settings.addServer.server.addTrackerServer,
+                port: data.settings.addServer.server.addTrackerPort
+            });
+            data.settings.addServer.server.addTrackerServer = undefined;
+            data.settings.addServer.server.addTrackerPort = undefined;
+        };
+
         $scope.openMenu = function(ev, screen) {
             $("button.server-tab").removeClass("btn-success").addClass("btn-primary");
             $(ev.currentTarget).removeClass("btn-primary").addClass("btn-success");
@@ -162,7 +223,19 @@ var app = angular.module("ddsn", []),
         };
 
         $scope.updateAddServerServerFramerate = function() {
-            data.settings.addServer.server.framerateValid = typeof data.settings.addServer.server.framerate === "number" && data.settings.addServer.server.framerate >= 1 && data.settings.addServer.server.framerate <= 999 && data && data.settings.addServer.server.framerate % 1 === 0;
+            data.settings.addServer.server.framerateValid = typeof data.settings.addServer.server.framerate === "number" && data.settings.addServer.server.framerate >= 1 && data.settings.addServer.server.framerate <= 999 &&  data.settings.addServer.server.framerate % 1 === 0;
+        };
+
+        $scope.updateAddServerServerTrackerRegion = function() {
+            data.settings.addServer.server.addTrackerRegionValid = typeof data.settings.addServer.server.addTrackerRegion === "number" && data.settings.addServer.server.addTrackerRegion >= 0 && data.settings.addServer.server.addTrackerRegion <= 12 && data.settings.addServer.server.addTrackerRegion % 1 === 0;
+        };
+
+        $scope.updateAddServerServerTrackerServer = function() {
+            data.settings.addServer.server.addTrackerServerValid = typeof data.settings.addServer.server.addTrackerServer === "string" && data.settings.addServer.server.addTrackerServer.length !== 0;
+        };
+
+        $scope.updateAddServerServerTrackerPort = function() {
+            data.settings.addServer.server.addTrackerPortValid = typeof data.settings.addServer.server.addTrackerPort === "number" && data.settings.addServer.server.addTrackerPort >= 1 && data.settings.addServer.server.addTrackerPort <= 65535 && data.settings.addServer.server.addTrackerPort % 1 === 0;
         };
 
         $scope.updateSettingsDescent3Path = function() {

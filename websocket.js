@@ -76,6 +76,9 @@ module.exports = function() {
                             settings.default.server.gamespyportValid = true;
                             settings.default.server.portsDiffer = true;
                             settings.default.server.framerateValid = true;
+                            settings.default.server.addTrackerRegionValid = false;
+                            settings.default.server.addTrackerServerValid = false;
+                            settings.default.server.addTrackerPortValid = false;
                             settings.addServer = JSON.parse(JSON.stringify(settings.default));
 
                             // Get network interfaces.
