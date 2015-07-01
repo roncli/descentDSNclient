@@ -18,8 +18,9 @@
         "url": "https://github.com/roncli/descentDSNclient.git"
     },
     "dependencies": {
-        "descent3console": "0.1.1",
+        "descent3console": "0.1.2",
         "descent3launcher": "0.1.2",
+        "descent3mn3tools": "0.1.0",
         "express": "4.13.0",
         "handlebars": "3.0.3",
         "ws": "0.7.2"
