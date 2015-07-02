@@ -4,8 +4,8 @@ var cluster = require("cluster"),
     fs = require("fs"),
     path = require("path"),
     os = require("os"),
-    net = require("net"),
-    Launcher = require("descent3launcher");
+    Launcher = require("descent3launcher"),
+    mn3tools = require("descent3mn3tools");
 
 module.exports = function() {
     "use strict";
@@ -14,6 +14,12 @@ module.exports = function() {
         writingSettings = false,
         writeSettingsCallback,
         wss,
+
+        titleCase = function(text) {
+            return text.replace(/\w[\S\-]*/g, function(match) {
+                return match.charAt(0).toUpperCase() + match.substr(1).toLowerCase();
+            });
+        },
 
         writeSettings = function(settings, callback) {
             if (writingSettings) {
@@ -33,10 +39,54 @@ module.exports = function() {
                     callback();
                 }
             });
+        },
+
+        getConnectionAndGameTypes = function(d3path, callback) {
+            var connectionTypes = [],
+                gameTypes = [];
+            fs.readdir(path.join(d3path, "online"), function(err, connectionFiles) {
+                if (err) {
+                    callback(err);
+                    return;
+                }
+
+                connectionFiles.forEach(function(filename) {
+                    var match = /^(.*)\.d3c$/.safeexec(filename);
+
+                    if (match) {
+                        connectionTypes.push({
+                            name: match[1],
+                            titleName: titleCase(match[1])
+                        });
+                    }
+                });
+
+                fs.readdir(path.join(d3path, "netgames"), function(err, gameTypeFiles) {
+                    if (err) {
+                        callback(err);
+                        return;
+                    }
+
+                    gameTypeFiles.forEach(function(filename) {
+                        var match = /^(.*)\.d3m$/.safeexec(filename);
+
+                        if (match) {
+                            gameTypes.push({
+                                name: match[1],
+                                titleName: titleCase(match[1])
+                            });
+                        }
+                    });
+
+                    callback(null, connectionTypes, gameTypes);
+                });
+            });
         };
 
     // Run the WebSocket server in a domain.
     d.run(function() {
+        var settings = {};
+
         wss = new WebSocket.Server({port: 20921});
 
         // Listen for new connections.
@@ -44,8 +94,7 @@ module.exports = function() {
 
             // Parse any messages.
             ws.on("message", function(data) {
-                var message = JSON.parse(data),
-                    settings = {};
+                var message = JSON.parse(data);
 
                 switch (message.message) {
                     case "initialize":
@@ -79,6 +128,11 @@ module.exports = function() {
                             settings.default.server.addTrackerRegionValid = false;
                             settings.default.server.addTrackerServerValid = false;
                             settings.default.server.addTrackerPortValid = false;
+                            settings.default.game.networkModel = "cs";
+                            settings.default.game.maxPlayersValid = true;
+                            settings.default.game.ppsValid = true;
+                            settings.default.game.killGoalValid = true;
+                            settings.default.game.timeLimitValid = true;
                             settings.addServer = JSON.parse(JSON.stringify(settings.default));
 
                             // Get network interfaces.
@@ -89,11 +143,117 @@ module.exports = function() {
                                 }
                             }
 
-                            ws.send(JSON.stringify({
-                                message: "settings",
-                                settings: settings
+                            (function(callback) {
+                                if (settings.descent3 && settings.descent3.pathValid) {
+                                    // Get connection types.
+                                    getConnectionAndGameTypes(settings.descent3.path, function(err, connectionTypes, gameTypes) {
+                                        if (err) {
+                                            ws.send(JSON.stringify({
+                                                message: "warning",
+                                                text: "There was an error initializing the connection and game types.",
+                                                err: err
+                                            }));
+                                        } else {
+                                            settings.connectionTypes = connectionTypes;
+                                            settings.gameTypes = gameTypes;
+                                        }
+
+                                        callback();
+                                    });
+                                } else {
+                                    callback();
+                                }
+                            }(function() {
+                                ws.send(JSON.stringify({
+                                    message: "settings",
+                                    settings: settings
+                                }));
                             }));
                         });
+                        break;
+                    case "missions":
+                        if (settings.descent3.pathValid) {
+                            fs.readdir(settings.descent3.path, function(err, files) {
+                                var index = 0,
+                                    hadError = false,
+                                    missions = [];
+
+                                if (err) {
+                                    ws.send(JSON.stringify({
+                                        message: "warning",
+                                        text: "There was an error while reading your Descnet 3 directory.",
+                                        err: err
+                                    }));
+                                    return;
+                                }
+
+                                (function getMn3(callback) {
+                                    ws.send(JSON.stringify({
+                                        message: "missions.progress",
+                                        percent: 100 * index / files.length
+                                    }));
+
+                                    if (/\.mn3$/.test(files[index]) && !/_2\.mn3$/.test(files[index])) {
+                                        mn3tools.parse(path.join(settings.descent3.path, files[index]), function(err, file) {
+                                            if (err) {
+                                                if (hadError) {
+                                                    hadError = true;
+                                                    ws.send(JSON.stringify({
+                                                        message: "warning",
+                                                        text: "There was an error while reading " + files[index] + ".",
+                                                        err: err
+                                                    }));
+                                                } else {
+                                                    hadError = true;
+                                                    ws.send(JSON.stringify({
+                                                        message: "warning",
+                                                        text: "There was an error while reading " + files[index] + ".",
+                                                        err: err
+                                                    }));
+                                                    index++;
+                                                    if (index < files.length) {
+                                                        getMn3(callback);
+                                                        return;
+                                                    }
+                                                }
+                                            }
+
+                                            if (file.exists && file.levels && file.levels.length > 0) {
+                                                missions.push(file);
+                                            }
+
+                                            index++;
+                                            if (index < files.length) {
+                                                getMn3(callback);
+                                                return;
+                                            }
+
+                                            callback();
+                                        });
+                                    } else {
+                                        index++;
+                                        if (index < files.length) {
+                                            getMn3(callback);
+                                            return;
+                                        }
+
+                                        callback();
+                                    }
+                                }(function() {
+                                    missions.sort(function(a, b) {
+                                        return a.name.localeCompare(b.name);
+                                    });
+
+                                    fs.writeFile("./missions.json", JSON.stringify(settings), function() {
+                                        ws.send(JSON.stringify({
+                                            message: "missions",
+                                            missions: missions
+                                        }));
+                                    });
+                                }));
+                            });
+                        }
+
                         break;
                     case "settings.descent3.path":
                         if (!settings.descent3) {
@@ -102,10 +262,40 @@ module.exports = function() {
                         settings.descent3.path = message.path;
                         fs.exists(path.join(settings.descent3.path, os.platform() === "win32" ? "main.exe" : "main"), function(exists) {
                             settings.descent3.pathValid = exists;
-                            writeSettings(settings);
-                            ws.send(JSON.stringify({
-                                message: "settings.descent3.pathValid",
-                                valid: exists
+                            (function(callback) {
+                                if (exists) {
+                                    // Get connection types.
+                                    getConnectionAndGameTypes(settings.descent3.path, function(err, connectionTypes, gameTypes) {
+                                        if (err) {
+                                            ws.send(JSON.stringify({
+                                                message: "warning",
+                                                text: "There was an error initializing the connection and game types.",
+                                                err: err
+                                            }));
+                                        } else {
+                                            settings.connectionTypes = connectionTypes;
+                                            settings.gameTypes = gameTypes;
+
+                                            ws.send(JSON.stringify({
+                                                message: "settings",
+                                                settings: {
+                                                    connectionTypes: connectionTypes,
+                                                    gameTypes: gameTypes
+                                                }
+                                            }));
+                                        }
+
+                                        callback();
+                                    });
+                                } else {
+                                    callback();
+                                }
+                            }(function() {
+                                writeSettings(settings);
+                                ws.send(JSON.stringify({
+                                    message: "settings.descent3.pathValid",
+                                    valid: exists
+                                }));
                             }));
                         });
                         break;
@@ -115,7 +305,7 @@ module.exports = function() {
     });
 
     // Log any errors and restart the worker.
-    d.on("error", function(err) {
+    d.on("error2", function(err) {
         console.log("An error occurred:", err);
 
         if (wss) {

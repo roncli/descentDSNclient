@@ -3,6 +3,21 @@ var cluster = require("cluster"),
     websocket = require("./websocket"),
     webServerWorker, webSocketWorker;
 
+// A safe regexp exec method that does not leak memory.
+RegExp.prototype.safeexec = function(string) {
+    "use strict";
+
+    var result = this.exec(string);
+
+    if (result) {
+        result.forEach(function(item, index) {
+            result[index] = item.split("").join("");
+        });
+    }
+
+    return result;
+};
+
 // Use clustering to spawn separate processes.
 if (cluster.isMaster) {
     webServerWorker = cluster.fork({

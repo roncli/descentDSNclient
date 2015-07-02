@@ -10,7 +10,14 @@ var app = angular.module("ddsn", []),
             descent3: {
                 pathValid: false
             }
-        }
+        },
+        difficulties: [
+            {difficulty: 0, name: "Trainee"},
+            {difficulty: 1, name: "Rookie"},
+            {difficulty: 2, name: "Hotshot"},
+            {difficulty: 3, name: "Ace"},
+            {difficulty: 4, name: "Insane"}
+        ]
     };
 
 (function() {
@@ -238,6 +245,39 @@ var app = angular.module("ddsn", []),
             data.settings.addServer.server.addTrackerPortValid = typeof data.settings.addServer.server.addTrackerPort === "number" && data.settings.addServer.server.addTrackerPort >= 1 && data.settings.addServer.server.addTrackerPort <= 65535 && data.settings.addServer.server.addTrackerPort % 1 === 0;
         };
 
+        $scope.updateAddServerGameNetworkModel = function() {
+            switch (data.settings.addServer.game.networkModel) {
+                case "p2p":
+                    data.settings.addServer.game.peer2peer = true;
+                    data.settings.addServer.game.permissible = false;
+                    break;
+                case "pcs":
+                    data.settings.addServer.game.peer2peer = false;
+                    data.settings.addServer.game.permissible = true;
+                    break;
+                default:
+                    data.settings.addServer.game.peer2peer = false;
+                    data.settings.addServer.game.permissible = false;
+                    break;
+            }
+        };
+
+        $scope.updateAddServerGameMaxPlayers = function() {
+            data.settings.addServer.game.maxPlayersValid = typeof data.settings.addServer.game.maxPlayers === "number" && data.settings.addServer.game.maxPlayers >= 1 && data.settings.addServer.game.maxPlayers <= 31 && data.settings.addServer.game.maxPlayers % 1 === 0;
+        };
+
+        $scope.updateAddServerGamePps = function() {
+            data.settings.addServer.game.ppsValid = typeof data.settings.addServer.game.pps === "number" && data.settings.addServer.game.pps >= 1 && data.settings.addServer.game.pps <= 20 && data.settings.addServer.game.pps % 1 === 0;
+        };
+
+        $scope.updateAddServerGameKillGoal = function() {
+            data.settings.addServer.game.killGoalValid = data.settings.addServer.game.killGoal === null || (typeof data.settings.addServer.game.killGoal === "number" && data.settings.addServer.game.killGoal >= 1 && data.settings.addServer.game.killGoal % 1 === 0);
+        };
+
+        $scope.updateAddServerGameTimeLimit = function() {
+            data.settings.addServer.game.timeLimitValid = data.settings.addServer.game.timeLimit === null || (typeof data.settings.addServer.game.timeLimit === "number" && data.settings.addServer.game.timeLimit >= 1 && data.settings.addServer.game.timeLimit % 1 === 0);
+        };
+
         $scope.updateSettingsDescent3Path = function() {
             ws.send(JSON.stringify({
                 message: "settings.descent3.path",
@@ -275,6 +315,12 @@ var app = angular.module("ddsn", []),
                     key;
 
                 switch (message.message) {
+                    case "missions":
+                        // TODO: Handle missions
+                        break;
+                    case "missions.progress":
+                        // TODO: Handle missinos progress
+                        break;
                     case "settings":
                         for (key in message.settings) {
                             if (message.settings.hasOwnProperty(key)) {
@@ -286,6 +332,9 @@ var app = angular.module("ddsn", []),
                     case "settings.descent3.pathValid":
                         data.settings.descent3.pathValid = message.valid;
                         scope.$apply();
+                        break;
+                    case "warning":
+                        // TODO: Handle warning
                         break;
                 }
             };

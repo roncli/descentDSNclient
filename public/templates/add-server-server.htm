@@ -3,9 +3,8 @@
         <div class="input-group">
             <span class="input-group-addon" style="white-space: nowrap; width: 1px;">IP address:</span>
             <span class="input-group-addon" style="width: 100%; padding: 0;">
-                <select class="form-control" ng-model="data.settings.addServer.server.ip">
+                <select class="form-control" ng-model="data.settings.addServer.server.ip" ng-options="network.ip as (network.ip + ' - ' + network.name) for network in data.settings.interfaces">
                     <option value="">Default</option>
-                    <option ng-repeat="network in data.settings.interfaces" value="{{network.ip}}">{{network.ip}} - {{network.name}}</option>
                 </select>
             </span>
         </div>

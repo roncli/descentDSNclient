@@ -1,0 +1,58 @@
+<div class="row">
+    <div class="col-xs-6">
+        <div ng-class="{true: 'input-group', false: 'input-group has-error'}[data.settings.addServer.game.gameName.length > 0]">
+            <span class="input-group-addon">Game name:</span>
+            <input type="text" class="form-control" placeholder="Displayed game name" ng-model="data.settings.addServer.game.gameName" />
+        </div>
+        <div class="input-group">
+            <span class="input-group-addon" style="white-space: nowrap; width: 1px;">Connection type:</span>
+            <span class="input-group-addon" style="width: 100%; padding: 0;">
+                <select class="form-control" ng-model="data.settings.addServer.game.connectionName" ng-options="connectionType.name as connectionType.titleName for connectionType in data.settings.connectionTypes"></select>
+            </span>
+        </div>
+        <div class="input-group">
+            <span class="input-group-addon" style="white-space: nowrap; width: 1px;">Game type:</span>
+            <span class="input-group-addon" style="width: 100%; padding: 0;">
+                <select class="form-control" ng-model="data.settings.addServer.game.scriptName" ng-options="gameType.name as gameType.titleName for gameType in data.settings.gameTypes"></select>
+            </span>
+        </div>
+        <div class="input-group">
+            <span class="input-group-addon" style="white-space: nowrap; width: 1px;">Server network model:</span>
+            <span class="input-group-addon" style="width: 100%; padding: 0;">
+                <select class="form-control" ng-model="data.settings.addServer.game.networkModel" ng-change="updateAddServerGameNetworkModel()">
+                    <option value="cs">Client/Server</option>
+                    <option value="p2p">Peer to Peer</option>
+                    <option value="pcs">Permissible Client Server</option>
+                </select>
+            </span>
+        </div>
+        <div class="input-group">
+            <span class="input-group-addon">Message of the day:</span>
+            <input type="text" class="form-control" placeholder="Message displayed to players when they connect" ng-model="data.settings.addServer.game.motd" />
+        </div>
+    </div>
+    <div class="col-xs-6">
+        <div ng-class="{true: 'input-group', false: 'input-group has-error'}[data.settings.addServer.game.maxPlayersValid]">
+            <span class="input-group-addon">Max players:</span>
+            <input type="number" min="1" max="31" class="form-control" placeholder="Maximum players between 1 and 31" ng-model="data.settings.addServer.game.maxPlayers" ng-blur="updateAddServerGameMaxPlayers()" />
+        </div>
+        <div ng-class="{true: 'input-group', false: 'input-group has-error'}[data.settings.addServer.game.ppsValid]">
+            <span class="input-group-addon">Max packets per second:</span>
+            <input type="number" min="1" max="20" class="form-control" placeholder="Maximum packets per second between 1 and 20" ng-model="data.settings.addServer.game.pps" ng-blur="updateAddServerGamePps()"/>
+        </div>
+        <div ng-class="{true: 'input-group', false: 'input-group has-error'}[data.settings.addServer.game.killGoalValid]">
+            <span class="input-group-addon">Score goal:</span>
+            <input type="number" min="1" class="form-control" placeholder="Score goal, optional" ng-model="data.settings.addServer.game.killGoal" ng-blur="updateAddServerGameKillGoal()"/>
+        </div>
+        <div ng-class="{true: 'input-group', false: 'input-group has-error'}[data.settings.addServer.game.timeLimitValid]">
+            <span class="input-group-addon">Time limit in minutes:</span>
+            <input type="number" min="1" class="form-control" placeholder="Time limit in minutes, optional" ng-model="data.settings.addServer.game.timeLimit" ng-blur="updateAddServerGameTimeLimit()"/>
+        </div>
+        <div class="input-group">
+            <span class="input-group-addon" style="white-space: nowrap; width: 1px;">Difficulty:</span>
+            <span class="input-group-addon" style="width: 100%; padding: 0;">
+                <select class="form-control" ng-model="data.settings.addServer.game.setDifficulty" ng-options="difficulty.difficulty as difficulty.name for difficulty in data.difficulties"></select>
+            </span>
+        </div>
+    </div>
+</div>
