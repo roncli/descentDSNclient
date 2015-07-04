@@ -13,7 +13,7 @@
         <div class="input-group">
             <span class="input-group-addon" style="white-space: nowrap; width: 1px;">Game type:</span>
             <span class="input-group-addon" style="width: 100%; padding: 0;">
-                <select class="form-control" ng-model="data.settings.addServer.game.scriptName" ng-options="gameType.name as gameType.titleName for gameType in data.settings.gameTypes"></select>
+                <select class="form-control" ng-model="data.settings.addServer.game.scriptName" ng-options="gameType.name as gameType.titleName for gameType in data.settings.gameTypes" ng-change="missionSearch()"></select>
             </span>
         </div>
         <div class="input-group">
@@ -55,4 +55,218 @@
             </span>
         </div>
     </div>
+</div><br />
+<div ng-if="data.missions.length > 0">
+    <div class="input-group" ng-class="{true: 'input-group', false: 'input-group has-error'}[data.settings.addServer.game.missionName]">
+        <span class="input-group-addon">Mission search:</span>
+        <input type="text" class="form-control" placeholder="Search for a mission!  Try Vander or Indika or monsterball" ng-model="data.settings.addServer.game.missionSearch" ng-change="missionSearch()" />
+        <span class="input-group-btn" ng-if="!data.loadingMissions">
+            <button class="btn btn-info" type="button" ng-click="refreshMissions()"><span class="glyphicon glyphicon-refresh"></span> Reload Missions</button>
+        </span>
+        <span class="input-group-addon" ng-if="data.loadingMissions">
+            Loading: {{data.loadingMissionPercent.toFixed(1)}}%
+        </span>
+    </div>
+    <div class="input-group">
+        <span class="input-group-addon" style="white-space: nowrap; width: 1px;">Selected mission:</span>
+        <span class="input-group-addon" style="width: 100%; padding: 0; text-align: left;">{{data.settings.addServer.game.missionName}} <button class="btn btn-sm btn-info" ng-if="data.settings.addServer.game.selectedMission" ng-click="data.showMissionToggle = !data.showMissionToggle;"><span ng-class="{true: 'glyphicon glyphicon-minus-sign', false: 'glyphicon glyphicon-plus-sign'}[!!data.showMissionToggle]"></span></button></span>
+    </div>
+    <div class="input-group" ng-if="data.settings.addServer.game.missionName">
+        <span class="input-group-addon" style="white-space: nowrap; width: 1px;">Starting Level:</span>
+        <span class="input-group-addon" style="width: 100%; padding: 0;">
+            <select class="form-control" ng-model="data.settings.addServer.game.setLevel" ng-options="(data.settings.addServer.game.selectedMission.data.levels.indexOf(level) + 1) as ((data.settings.addServer.game.selectedMission.data.levels.indexOf(level) + 1).toString() + ') ' + (level.name || level.mine)) for level in data.settings.addServer.game.selectedMission.data.levels"></select>
+        </span>
+    </div>
+    <div ng-if="data.showMissionToggle">
+        <table class="table table-condensed" style="margin-bottom: 0">
+            <tr ng-repeat="level in data.settings.addServer.game.selectedMission.data.levels">
+                <td style="white-space: nowrap;" rowspan="{{data.settings.addServer.game.selectedMission.data.levels.length}}" ng-if="$index === 0">
+                    Name: {{data.settings.addServer.game.selectedMission.name}}<br />
+                    Filename: {{data.settings.addServer.game.selectedMission.shortFilename}}<br/>
+                    Author: {{data.settings.addServer.game.selectedMission.data.author}}
+                </td>
+                <td>
+                    {{$index + 1}}) {{level.name || level.mine}}<br />
+                    by: {{level.author}}<br ng-if="level.description" />
+                    {{level.description}}
+                </td>
+            </tr>
+        </table>
+    </div>
+    <div ng-if="data.missionsList && data.missionsList.length > 0">
+        <div class="panel panel-default" style="margin-bottom: 0;">
+            <div class="panel-heading text-center"><b>Select a mission:</b> <button class="btn btn-sm btn-info" ng-click="data.selectMissionToggle = !data.selectMissionToggle;"><span ng-class="{true: 'glyphicon glyphicon-minus-sign', false: 'glyphicon glyphicon-plus-sign'}[!!data.selectMissionToggle]"></span></button></div>
+            <div ng-if="data.selectMissionToggle" class="panel-body" style="max-height: 195px; overflow-y: auto;">
+                <div class="row">
+                    <div ng-repeat-start="mission in data.missionsList" class="col-xs-4" style="margin-bottom: 10px;">
+                        <button class="btn btn-default" style="white-space: normal; width: 100%;" ng-click="selectMission(mission)">
+                            <b>{{mission.name}}</b><br />
+                            <span ng-if="mission.data.author" class="text-muted">by: {{mission.data.author}}</span>
+                        </button>
+                    </div>
+                    <div ng-repeat-end ng-if="$index < data.missionsList.length && $index % 3 === 2" class="clearfix"></div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+<div ng-if="!data.missions || data.missions.length === 0">
+    <span class="input-group-addon" style="white-space: normal; width: 100%; text-align: left;">Missions are not yet loaded.  Please load the missions to continue.  You will need to reload missions whenever you make a change to your Descent 3 missions directory.</span>
+    <span class="input-group-btn" ng-if="!data.loadingMissions">
+        <button class="btn btn-info" type="button" ng-click="refreshMissions()"><span class="glyphicon glyphicon-refresh"></span> Load Missions</button>
+    </span>
+    <span class="input-group-addon" ng-if="data.loadingMissions">
+        Loading: {{data.loadingMissionPercent.toFixed(1)}}%
+    </span>
+</div><br />
+<div class="row">
+    <div class="col-xs-6">
+        <div class="input-group">
+            <span class="input-group-addon" style="white-space: nowrap; width: 1px;">Teams (for game modes that support multiple teams):</span>
+            <span class="input-group-addon" style="width: 100%; padding: 0;">
+                <select class="form-control" ng-model="data.settings.addServer.game.numTeams" ng-options="teams as teams for teams in [2, 3, 4]"></select>
+            </span>
+        </div>
+        <div class="input-group">
+            <label for="addServerGameAllowTeamChange" class="input-group-addon" style="white-space: nowrap; width: 1px;">Allow team changes:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerGameAllowTeamChange" ng-model="data.settings.addServer.game.allowTeamChange" />
+            </span>
+        </div>
+        <div class="input-group">
+            <label for="addServerGameAutoBalance" class="input-group-addon" style="white-space: nowrap; width: 1px;">Auto balance teams on player join:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerGameAutoBalance" ng-model="data.settings.addServer.game.autoBalance" />
+            </span>
+        </div>
+    </div>
+    <div class="col-xs-6">
+        <div class="input-group">
+            <span class="input-group-addon">Team 1 Name (Red):</span>
+            <input type="text" class="form-control" placeholder="Name for team 1" ng-model="data.settings.addServer.game.setTeamName[0]" ng-blur="updateAddServerGameTeamName(0)" />
+        </div>
+        <div class="input-group">
+            <span class="input-group-addon">Team 2 Name (Blue):</span>
+            <input type="text" class="form-control" placeholder="Name for team 2" ng-model="data.settings.addServer.game.setTeamName[1]" ng-blur="updateAddServerGameTeamName(1)" />
+        </div>
+        <div class="input-group" ng-if="data.settings.addServer.game.numTeams >= 3">
+            <span class="input-group-addon">Team 3 Name (Green):</span>
+            <input type="text" class="form-control" placeholder="Name for team 3" ng-model="data.settings.addServer.game.setTeamName[2]" ng-blur="updateAddServerGameTeamName(2)" />
+        </div>
+        <div class="input-group" ng-if="data.settings.addServer.game.numTeams >= 4">
+            <span class="input-group-addon">Team 4 Name (Yellow):</span>
+            <input type="text" class="form-control" placeholder="Name for team 4" ng-model="data.settings.addServer.game.setTeamName[3]" ng-blur="updateAddServerGameTeamName(3)" />
+        </div>
+    </div>
+</div><br />
+<div class="row">
+    <div class="col-xs-6">
+        <div class="input-group">
+            <label for="addServerGameRandomizeRespawn" class="input-group-addon" style="white-space: nowrap; width: 1px;">Randomize powerup respawn:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerGameRandomizeRespawn" ng-model="data.settings.addServer.game.randomizeRespawn" />
+            </span>
+        </div>
+        <div ng-class="{true: 'input-group', false: 'input-group has-error'}[data.settings.addServer.game.respawnTimeValid]">
+            <span class="input-group-addon">Powerup respawn time in seconds:</span>
+            <input type="number" min="1" class="form-control" placeholder="Powerup respawn time in seconds" ng-model="data.settings.addServer.game.respawnTime" ng-blur="updateAddServerGameRespawnTime()"/>
+        </div>
+        <div class="input-group">
+            <label for="addServerGameStatMsgs" class="input-group-addon" style="white-space: nowrap; width: 1px;">Random statistical messages:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerGameStatMsgs" ng-model="data.settings.addServer.game.statMsgs" />
+            </span>
+        </div>
+    </div>
+    <div class="col-xs-6">
+        <div ng-class="{true: 'input-group', false: 'input-group has-error'}[data.settings.addServer.game.audioTauntDelayValid]">
+            <span class="input-group-addon">Audio taunt delay in seconds:</span>
+            <input type="number" min="1" class="form-control" placeholder="Audio taunt delay in seconds" ng-model="data.settings.addServer.game.audioTauntDelay" ng-blur="updateAddServerGameAudioTauntDelay()"/>
+        </div>
+        <div class="input-group">
+            <span class="input-group-addon" style="white-space: nowrap; width: 1px;">Kill message filter:</span>
+            <span class="input-group-addon" style="width: 100%; padding: 0;">
+                <select class="form-control" ng-model="data.settings.addServer.game.killMsgFilter" ng-options="filter.toLowerCase() as filter for filter in ['Full', 'Simple', 'None']"></select>
+            </span>
+        </div>
+        <div class="input-group">
+            <span class="input-group-addon" style="white-space: nowrap; width: 1px;">Maximum HUD name level:</span>
+            <span class="input-group-addon" style="width: 100%; padding: 0;">
+                <select class="form-control" ng-model="data.settings.addServer.game.serverHudNames" ng-options="names.toLowerCase() as names for names in ['Full', 'Team', 'None']"></select>
+            </span>
+        </div>
+    </div>
+</div><br />
+<div class="row">
+    <div class="col-xs-6">
+        <div class="input-group">
+            <label for="addServerGameAccurateCollisions" class="input-group-addon" style="white-space: nowrap; width: 1px;">Accurate weapon collisions:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerGameAccurateCollisions" ng-model="data.settings.addServer.game.accurateCollisions" />
+            </span>
+        </div>
+        <div class="input-group">
+            <label for="addServerGameSendRotVel" class="input-group-addon" style="white-space: nowrap; width: 1px;">Send rotational velocities:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerGameSendRotVel" ng-model="data.settings.addServer.game.sendRotVel" />
+            </span>
+        </div>
+        <div class="input-group">
+            <label for="addServerGameUseSmoothing" class="input-group-addon" style="white-space: nowrap; width: 1px;">Use smoothing:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerGameUseSmoothing" ng-model="data.settings.addServer.game.useSmoothing" />
+            </span>
+        </div>
+    </div>
+    <div class="col-xs-6">
+        <div class="input-group">
+            <label for="addServerGameAllowMouselook" class="input-group-addon" style="white-space: nowrap; width: 1px;">Allow mouselook:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerGameAllowMouselook" ng-model="data.settings.addServer.game.allowMouselook" />
+            </span>
+        </div>
+        <div class="input-group">
+            <label for="addServerGameBrightPlayers" class="input-group-addon" style="white-space: nowrap; width: 1px;">Bright player ships:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerGameBrightPlayers" ng-model="data.settings.addServer.game.brightPlayers" />
+            </span>
+        </div>
+    </div>
+</div><br />
+<div class="row">
+    <div class="col-xs-6">
+        <div class="input-group">
+            <label for="addServerGameAutoSaveLevel" class="input-group-addon" style="white-space: nowrap; width: 1px;">Save stats on level end:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerGameAutoSaveLevel" ng-model="data.settings.addServer.game.autoSaveLevel" />
+            </span>
+        </div>
+        <div class="input-group">
+            <label for="addServerGameAutoSaveDisconnect" class="input-group-addon" style="white-space: nowrap; width: 1px;">Save stats on game end:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerGameAutoSaveDisconnect" ng-model="data.settings.addServer.game.autoSaveDisconnect" />
+            </span>
+        </div>
+    </div>
+    <div class="col-xs-6">
+        <div class="input-group">
+            <label for="addServerGameRemoteAdmin" class="input-group-addon" style="white-space: nowrap; width: 1px;">Allow remote administration:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerGameRemoteAdmin" ng-model="data.settings.addServer.game.remoteAdmin" />
+            </span>
+        </div>
+        <div class="input-group" ng-if="data.settings.addServer.game.remoteAdmin">
+            <span class="input-group-addon">Remoate administration password:</span>
+            <input type="password" class="form-control" placeholder="Remote administration password, optional" ng-model="data.settings.addServer.game.remoteAdminPass" />
+        </div>
+    </div>
+</div><br />
+
+<div class="alert alert-danger" role="alert" ng-if="data.settings.addServer.game.gameName.length === 0"><span class="glyphicon glyphicon-alert"></span> You must enter the name of the game.</div>
+<div class="alert alert-danger" role="alert" ng-if="!data.settings.addServer.game.maxPlayersValid"><span class="glyphicon glyphicon-alert"></span> You must enter a valid maximum number of players between 1 and 31.</div>
+<div class="alert alert-danger" role="alert" ng-if="!data.settings.addServer.game.ppsValid"><span class="glyphicon glyphicon-alert"></span> You must enter a valid maximum packets per second between 1 and 20.</div>
+<div class="alert alert-danger" role="alert" ng-if="!data.settings.addServer.game.killGoalValid"><span class="glyphicon glyphicon-alert"></span> You must enter a valid score goal greater than 0, or leave it blank.</div>
+<div class="alert alert-danger" role="alert" ng-if="!data.settings.addServer.game.timeLimitValid"><span class="glyphicon glyphicon-alert"></span> You must enter a valid time limit in minutes greater than 0, or leave it blank.</div>
+<div class="alert alert-danger" role="alert" ng-if="!data.settings.addServer.game.missionName"><span class="glyphicon glyphicon-alert"></span> You must select a mission to play.</div>
+<div class="alert alert-danger" role="alert" ng-if="!data.settings.addServer.game.respawnTimeValid"><span class="glyphicon glyphicon-alert"></span> You must enter a valid respawn time greater than 0.</div>
+<div class="alert alert-danger" role="alert" ng-if="!data.settings.addServer.game.audioTauntDelayValid"><span class="glyphicon glyphicon-alert"></span> You must enter a valid audio taunt delay greater than 0.</div>

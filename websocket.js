@@ -92,6 +92,21 @@ module.exports = function() {
         // Listen for new connections.
         wss.on("connection", function(ws) {
 
+            var sendMissions = function(missions) {
+                ws.send(JSON.stringify({
+                    message: "missions",
+                    missions: missions.map(function(mission) {
+                        return {
+                            name: mission.name,
+                            filename: mission.filename,
+                            mission: JSON.stringify(mission).toLowerCase(),
+                            data: mission,
+                            shortFilename: mission.shortFilename
+                        };
+                    })
+                }));
+            };
+
             // Parse any messages.
             ws.on("message", function(data) {
                 var message = JSON.parse(data);
@@ -100,80 +115,114 @@ module.exports = function() {
                     case "initialize":
                         // Read in settings JSON.
                         fs.exists("./settings.json", function(exists) {
-                            var interfaces = os.networkInterfaces(),
-                                key,
-
-                                addInterface = function(network) {
-                                    if (network.family === "IPv4") {
-                                        settings.interfaces.push({
-                                            name: key,
-                                            ip: network.address
-                                        });
-                                    }
-                                };
+                            var interfaces = os.networkInterfaces();
 
                             // Get saved settings.
-                            if (exists) {
-                                settings = require("./settings.json");
-                            } else {
-                                settings = {};
-                            }
-
-                            // Get default settings.
-                            settings.default = JSON.parse(JSON.stringify(Launcher.defaultOptions));
-                            settings.default.server.portValid = true;
-                            settings.default.server.gamespyportValid = true;
-                            settings.default.server.portsDiffer = true;
-                            settings.default.server.framerateValid = true;
-                            settings.default.server.addTrackerRegionValid = false;
-                            settings.default.server.addTrackerServerValid = false;
-                            settings.default.server.addTrackerPortValid = false;
-                            settings.default.game.networkModel = "cs";
-                            settings.default.game.maxPlayersValid = true;
-                            settings.default.game.ppsValid = true;
-                            settings.default.game.killGoalValid = true;
-                            settings.default.game.timeLimitValid = true;
-                            settings.addServer = JSON.parse(JSON.stringify(settings.default));
-
-                            // Get network interfaces.
-                            settings.interfaces = [];
-                            for (key in interfaces) {
-                                if (interfaces.hasOwnProperty(key)) {
-                                    interfaces[key].forEach(addInterface);
-                                }
-                            }
-
                             (function(callback) {
-                                if (settings.descent3 && settings.descent3.pathValid) {
-                                    // Get connection types.
-                                    getConnectionAndGameTypes(settings.descent3.path, function(err, connectionTypes, gameTypes) {
+                                if (exists) {
+                                    fs.readFile("./settings.json", function(err, settingsJson) {
                                         if (err) {
                                             ws.send(JSON.stringify({
                                                 message: "warning",
-                                                text: "There was an error initializing the connection and game types.",
+                                                text: "There was an error reading the settings.json file.",
                                                 err: err
                                             }));
+                                            settings = {};
                                         } else {
-                                            settings.connectionTypes = connectionTypes;
-                                            settings.gameTypes = gameTypes;
+                                            settings = JSON.parse(settingsJson);
                                         }
-
                                         callback();
                                     });
                                 } else {
+                                    settings = {};
                                     callback();
                                 }
                             }(function() {
-                                ws.send(JSON.stringify({
-                                    message: "settings",
-                                    settings: settings
+                                var key,
+                                    addInterface = function(network) {
+                                        if (network.family === "IPv4") {
+                                            settings.interfaces.push({
+                                                name: key,
+                                                ip: network.address
+                                            });
+                                        }
+                                    };
+
+                                // Get default settings.
+                                settings.default = JSON.parse(JSON.stringify(Launcher.defaultOptions));
+                                settings.default.server.portValid = true;
+                                settings.default.server.gamespyportValid = true;
+                                settings.default.server.portsDiffer = true;
+                                settings.default.server.framerateValid = true;
+                                settings.default.server.addTrackerRegionValid = false;
+                                settings.default.server.addTrackerServerValid = false;
+                                settings.default.server.addTrackerPortValid = false;
+                                settings.default.game.networkModel = "cs";
+                                settings.default.game.maxPlayersValid = true;
+                                settings.default.game.ppsValid = true;
+                                settings.default.game.killGoalValid = true;
+                                settings.default.game.timeLimitValid = true;
+                                settings.default.game.respawnTimeValid = true;
+                                settings.default.game.audioTauntDelayValid = true;
+                                settings.addServer = JSON.parse(JSON.stringify(settings.default));
+
+                                // Get network interfaces.
+                                settings.interfaces = [];
+                                for (key in interfaces) {
+                                    if (interfaces.hasOwnProperty(key)) {
+                                        interfaces[key].forEach(addInterface);
+                                    }
+                                }
+
+                                (function(callback) {
+                                    if (settings.descent3 && settings.descent3.pathValid) {
+                                        // Get connection types.
+                                        getConnectionAndGameTypes(settings.descent3.path, function(err, connectionTypes, gameTypes) {
+                                            if (err) {
+                                                ws.send(JSON.stringify({
+                                                    message: "warning",
+                                                    text: "There was an error initializing the connection and game types.",
+                                                    err: err
+                                                }));
+                                            } else {
+                                                settings.connectionTypes = connectionTypes;
+                                                settings.gameTypes = gameTypes;
+                                            }
+
+                                            callback();
+                                        });
+                                    } else {
+                                        callback();
+                                    }
+                                }(function() {
+                                    ws.send(JSON.stringify({
+                                        message: "settings",
+                                        settings: settings
+                                    }));
                                 }));
                             }));
+                        });
+
+                        // Read in missions JSON.
+                        fs.exists("./missions.json", function(exists) {
+                            if (exists) {
+                                fs.readFile("./missions.json", function(err, missions) {
+                                    if (err) {
+                                        ws.send(JSON.stringify({
+                                            message: "warning",
+                                            text: "There was an error reading the missions.json file.  You will need to refresh your missions.",
+                                            err: err
+                                        }));
+                                        return;
+                                    }
+                                    sendMissions(JSON.parse(missions));
+                                });
+                            }
                         });
                         break;
                     case "missions":
                         if (settings.descent3.pathValid) {
-                            fs.readdir(settings.descent3.path, function(err, files) {
+                            fs.readdir(path.join(settings.descent3.path, "missions"), function(err, files) {
                                 var index = 0,
                                     hadError = false,
                                     missions = [];
@@ -192,9 +241,8 @@ module.exports = function() {
                                         message: "missions.progress",
                                         percent: 100 * index / files.length
                                     }));
-
                                     if (/\.mn3$/.test(files[index]) && !/_2\.mn3$/.test(files[index])) {
-                                        mn3tools.parse(path.join(settings.descent3.path, files[index]), function(err, file) {
+                                        mn3tools.parse(path.join(settings.descent3.path, "missions", files[index]), function(err, file) {
                                             if (err) {
                                                 if (hadError) {
                                                     hadError = true;
@@ -219,6 +267,7 @@ module.exports = function() {
                                             }
 
                                             if (file.exists && file.levels && file.levels.length > 0) {
+                                                file.shortFilename = files[index];
                                                 missions.push(file);
                                             }
 
@@ -244,11 +293,8 @@ module.exports = function() {
                                         return a.name.localeCompare(b.name);
                                     });
 
-                                    fs.writeFile("./missions.json", JSON.stringify(settings), function() {
-                                        ws.send(JSON.stringify({
-                                            message: "missions",
-                                            missions: missions
-                                        }));
+                                    fs.writeFile("./missions.json", JSON.stringify(missions), function() {
+                                        sendMissions(missions);
                                     });
                                 }));
                             });

@@ -20,7 +20,7 @@
     "dependencies": {
         "descent3console": "0.1.2",
         "descent3launcher": "0.1.2",
-        "descent3mn3tools": "0.1.0",
+        "descent3mn3tools": "0.1.1",
         "express": "4.13.0",
         "handlebars": "3.0.3",
         "ws": "0.7.2"

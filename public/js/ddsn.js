@@ -17,7 +17,8 @@ var app = angular.module("ddsn", []),
             {difficulty: 2, name: "Hotshot"},
             {difficulty: 3, name: "Ace"},
             {difficulty: 4, name: "Insane"}
-        ]
+        ],
+        selectMissionToggle: true
     };
 
 (function() {
@@ -278,6 +279,77 @@ var app = angular.module("ddsn", []),
             data.settings.addServer.game.timeLimitValid = data.settings.addServer.game.timeLimit === null || (typeof data.settings.addServer.game.timeLimit === "number" && data.settings.addServer.game.timeLimit >= 1 && data.settings.addServer.game.timeLimit % 1 === 0);
         };
 
+        $scope.missionSearch = function() {
+            if (data.settings.addServer.game.missionSearch.length < 2) {
+                return;
+            }
+
+            var searchStrings = data.settings.addServer.game.missionSearch.toLowerCase().replace(/[^a-zA-Z0-9'\-\.]+/, " ").trim().split(" ");
+
+            data.missionsList = data.missions.filter(function(mission) {
+                var index;
+
+                if (
+                    (data.settings.addServer.game.scriptName === 'ctf' && !mission.data.gameTypes.ctf) ||
+                    (data.settings.addServer.game.scriptName === 'entropy' && !mission.data.gameTypes.entropy) ||
+                    (data.settings.addServer.game.scriptName === 'hoard' && !mission.data.gameTypes.hoard) ||
+                    (data.settings.addServer.game.scriptName === 'monsterball' && !mission.data.gameTypes.monsterball)
+                ) {
+                    return false;
+                }
+
+                for (index = 0; index < searchStrings.length; index++) {
+                    if (mission.mission.indexOf(searchStrings[index]) === -1) {
+                        return false;
+                    }
+                }
+                return true;
+            });
+
+            data.selectMissionToggle = true;
+        };
+
+        $scope.refreshMissions = function() {
+            data.loadingMissions = true;
+            ws.send(JSON.stringify({
+                message: "missions"
+            }));
+        };
+
+        $scope.selectMission = function(mission) {
+            data.settings.addServer.game.selectedMission = mission;
+            data.settings.addServer.game.missionName = mission.shortFilename;
+            data.selectMissionToggle = false;
+            data.settings.addServer.game.setLevel = 1;
+        };
+
+        $scope.updateAddServerGameTeamName = function(teamNum) {
+            if (data.settings.addServer.game.setTeamName[teamNum].length === 0) {
+                switch (teamNum) {
+                    case 0:
+                        data.settings.addServer.game.setTeamName[0] = "Red";
+                        break;
+                    case 1:
+                        data.settings.addServer.game.setTeamName[1] = "Blue";
+                        break;
+                    case 2:
+                        data.settings.addServer.game.setTeamName[2] = "Green";
+                        break;
+                    case 3:
+                        data.settings.addServer.game.setTeamName[3] = "Yellow";
+                        break;
+                }
+            }
+        };
+
+        $scope.updateAddServerGameRespawnTime = function() {
+            data.settings.addServer.game.respawnTimeValid = data.settings.addServer.game.respawnTime === null || (typeof data.settings.addServer.game.respawnTime === "number" && data.settings.addServer.game.respawnTime >= 1 && data.settings.addServer.game.respawnTime % 1 === 0);
+        };
+
+        $scope.updateAddServerGameAudioTauntDelay = function() {
+            data.settings.addServer.game.audioTauntDelayValid = data.settings.addServer.game.audioTauntDelay === null || (typeof data.settings.addServer.game.audioTauntDelay === "number" && data.settings.addServer.game.audioTauntDelay >= 1 && data.settings.addServer.game.audioTauntDelay % 1 === 0);
+        };
+
         $scope.updateSettingsDescent3Path = function() {
             ws.send(JSON.stringify({
                 message: "settings.descent3.path",
@@ -316,10 +388,13 @@ var app = angular.module("ddsn", []),
 
                 switch (message.message) {
                     case "missions":
-                        // TODO: Handle missions
+                        data.missions = message.missions;
+                        data.loadingMissions = false;
+                        scope.$apply();
                         break;
                     case "missions.progress":
-                        // TODO: Handle missinos progress
+                        data.loadingMissionPercent = message.percent;
+                        scope.$apply();
                         break;
                     case "settings":
                         for (key in message.settings) {

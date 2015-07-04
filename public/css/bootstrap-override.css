@@ -5,3 +5,7 @@
 .input-group-addon:last-child {
     border-right: none;
 }
+
+table {
+    font-size: inherit;
+}
