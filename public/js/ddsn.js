@@ -350,6 +350,10 @@ var app = angular.module("ddsn", []),
             data.settings.addServer.game.audioTauntDelayValid = data.settings.addServer.game.audioTauntDelay === null || (typeof data.settings.addServer.game.audioTauntDelay === "number" && data.settings.addServer.game.audioTauntDelay >= 1 && data.settings.addServer.game.audioTauntDelay % 1 === 0);
         };
 
+        $scope.updateAddServerAllowedShips = function() {
+            data.settings.addServer.allowed.shipsValid = data.settings.addServer.allowed.ships.blackpyro || data.settings.addServer.allowed.ships.magnumaht || data.settings.addServer.allowed.ships.phoenix || data.settings.addServer.allowed.ships.pyrogl;
+        };
+
         $scope.updateSettingsDescent3Path = function() {
             ws.send(JSON.stringify({
                 message: "settings.descent3.path",

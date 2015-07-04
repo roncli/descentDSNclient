@@ -1,0 +1,630 @@
+<div class="row">
+    <div class="col-xs-6">
+        <div class="input-group">
+            <label for="addServerAllowedPyroGl" class="input-group-addon" style="white-space: nowrap; width: 1px;">Pyro GL:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerAllowedPyroGl" ng-model="data.settings.addServer.allowed.ships.pyrogl" ng-change="updateAddServerAllowedShips()" />
+            </span>
+        </div>
+        <div class="input-group">
+            <label for="addServerAllowedPhoenix" class="input-group-addon" style="white-space: nowrap; width: 1px;">Phoenix:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerAllowedPhoenix" ng-model="data.settings.addServer.allowed.ships.phoenix" ng-change="updateAddServerAllowedShips()" />
+            </span>
+        </div>
+        <div class="input-group">
+            <label for="addServerAllowedMagnumAht" class="input-group-addon" style="white-space: nowrap; width: 1px;">Magnum AHT:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerAllowedMagnumAht" ng-model="data.settings.addServer.allowed.ships.magnumaht" ng-change="updateAddServerAllowedShips()" />
+            </span>
+        </div>
+        <div class="input-group">
+            <label for="addServerAllowedBlackPyro" class="input-group-addon" style="white-space: nowrap; width: 1px;">Black Pyro:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerAllowedBlackPyro" ng-model="data.settings.addServer.allowed.ships.blackpyro" ng-change="updateAddServerAllowedShips()" />
+            </span>
+        </div><br />
+
+        <div class="alert alert-danger" role="alert" ng-if="!data.settings.addServer.allowed.shipsValid"><span class="glyphicon glyphicon-alert"></span> You must select at least one ship.</div>
+        <br ng-if="!data.settings.addServer.allowed.shipsValid" />
+
+        <div class="input-group">
+            <label for="addServerAllowedSuperLaser" class="input-group-addon" style="white-space: nowrap; width: 1px;">Super Laser:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerAllowedSuperLaser" ng-model="data.settings.addServer.allowed.primaries.superlaser" />
+            </span>
+        </div>
+        <div class="input-group">
+            <label for="addServerAllowedVauss" class="input-group-addon" style="white-space: nowrap; width: 1px;">Vauss:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerAllowedVauss" ng-model="data.settings.addServer.allowed.primaries.vauss" />
+            </span>
+        </div>
+        <div class="input-group">
+            <label for="addServerAllowedMassDriver" class="input-group-addon" style="white-space: nowrap; width: 1px;">Mass Driver:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerAllowedMassDriver" ng-model="data.settings.addServer.allowed.primaries.massdriver" />
+            </span>
+        </div>
+        <div class="input-group">
+            <label for="addServerAllowedNapalm" class="input-group-addon" style="white-space: nowrap; width: 1px;">Napalm:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerAllowedNapalm" ng-model="data.settings.addServer.allowed.primaries.napalm" />
+            </span>
+        </div>
+        <div class="input-group">
+            <label for="addServerAllowedEmdLauncher" class="input-group-addon" style="white-space: nowrap; width: 1px;">EMD Launcher:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerAllowedEmdLauncher" ng-model="data.settings.addServer.allowed.primaries.emdlauncher" />
+            </span>
+        </div>
+        <div class="input-group">
+            <label for="addServerAllowedPlasmaCannon" class="input-group-addon" style="white-space: nowrap; width: 1px;">Plasma Cannon:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerAllowedPlasmaCannon" ng-model="data.settings.addServer.allowed.primaries.plasmacannon" />
+            </span>
+        </div>
+        <div class="input-group">
+            <label for="addServerAllowedMicrowave" class="input-group-addon" style="white-space: nowrap; width: 1px;">Microwave:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerAllowedMicrowave" ng-model="data.settings.addServer.allowed.primaries.microwave" />
+            </span>
+        </div>
+        <div class="input-group">
+            <label for="addServerAllowedFusionCannon" class="input-group-addon" style="white-space: nowrap; width: 1px;">Fusion Cannon:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerAllowedFusionCannon" ng-model="data.settings.addServer.allowed.primaries.fusioncannon" />
+            </span>
+        </div>
+        <div class="input-group">
+            <label for="addServerAllowedOmegaCannon" class="input-group-addon" style="white-space: nowrap; width: 1px;">Omega Cannon:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerAllowedOmegaCannon" ng-model="data.settings.addServer.allowed.primaries.omegacannon" />
+            </span>
+        </div><br />
+
+        <div class="input-group">
+            <label for="addServerAllowedConcussion" class="input-group-addon" style="white-space: nowrap; width: 1px;">Concussion:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerAllowedConcussion" ng-model="data.settings.addServer.allowed.secondaries.concussion" />
+            </span>
+        </div>
+        <div class="input-group">
+            <label for="addServerAllowedFourPackConc" class="input-group-addon" style="white-space: nowrap; width: 1px;">4-pack Concussion:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerAllowedFourPackConc" ng-model="data.settings.addServer.allowed.secondaries.fourpackconc" />
+            </span>
+        </div>
+        <div class="input-group">
+            <label for="addServerAllowedFrag" class="input-group-addon" style="white-space: nowrap; width: 1px;">Frag:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerAllowedFrag" ng-model="data.settings.addServer.allowed.secondaries.frag" />
+            </span>
+        </div>
+        <div class="input-group">
+            <label for="addServerAllowedFourPackFrag" class="input-group-addon" style="white-space: nowrap; width: 1px;">4-pack Frag:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerAllowedFourPackFrag" ng-model="data.settings.addServer.allowed.secondaries.fourpackfrag" />
+            </span>
+        </div>
+        <div class="input-group">
+            <label for="addServerAllowedHoming" class="input-group-addon" style="white-space: nowrap; width: 1px;">Homing:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerAllowedHoming" ng-model="data.settings.addServer.allowed.secondaries.homing" />
+            </span>
+        </div>
+        <div class="input-group">
+            <label for="addServerAllowedFourPackHoming" class="input-group-addon" style="white-space: nowrap; width: 1px;">4-pack Homing:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerAllowedFourPackHoming" ng-model="data.settings.addServer.allowed.secondaries.fourpackhoming" />
+            </span>
+        </div>
+        <div class="input-group">
+            <label for="addServerAllowedGuided" class="input-group-addon" style="white-space: nowrap; width: 1px;">Guided:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerAllowedGuided" ng-model="data.settings.addServer.allowed.secondaries.guided" />
+            </span>
+        </div>
+        <div class="input-group">
+            <label for="addServerAllowedFourPackGuided" class="input-group-addon" style="white-space: nowrap; width: 1px;">4-pack Guided:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerAllowedFourPackGuided" ng-model="data.settings.addServer.allowed.secondaries.fourpackguided" />
+            </span>
+        </div>
+        <div class="input-group">
+            <label for="addServerAllowedImpactMortar" class="input-group-addon" style="white-space: nowrap; width: 1px;">Impact Mortar:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerAllowedImpactMortar" ng-model="data.settings.addServer.allowed.secondaries.impactmortar" />
+            </span>
+        </div>
+        <div class="input-group">
+            <label for="addServerAllowedNapalmRocket" class="input-group-addon" style="white-space: nowrap; width: 1px;">Napalm Rocket:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerAllowedNapalmRocket" ng-model="data.settings.addServer.allowed.secondaries.napalmrocket" />
+            </span>
+        </div>
+        <div class="input-group">
+            <label for="addServerAllowedSmart" class="input-group-addon" style="white-space: nowrap; width: 1px;">Smart:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerAllowedSmart" ng-model="data.settings.addServer.allowed.secondaries.smart" />
+            </span>
+        </div>
+        <div class="input-group">
+            <label for="addServerAllowedCyclone" class="input-group-addon" style="white-space: nowrap; width: 1px;">Cyclone:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerAllowedCyclone" ng-model="data.settings.addServer.allowed.secondaries.cyclone" />
+            </span>
+        </div>
+        <div class="input-group">
+            <label for="addServerAllowedMega" class="input-group-addon" style="white-space: nowrap; width: 1px;">Mega:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerAllowedMega" ng-model="data.settings.addServer.allowed.secondaries.mega" />
+            </span>
+        </div>
+        <div class="input-group">
+            <label for="addServerAllowedBlackShark" class="input-group-addon" style="white-space: nowrap; width: 1px;">Black Shark:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerAllowedBlackShark" ng-model="data.settings.addServer.allowed.secondaries.blackshark" />
+            </span>
+        </div><br />
+
+        <div class="input-group">
+            <label for="addServerAllowedAfterburner" class="input-group-addon" style="white-space: nowrap; width: 1px;">Afterburner:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerAllowedAfterburner" ng-model="data.settings.addServer.allowed.powerups.afterburner" />
+            </span>
+        </div>
+        <div class="input-group">
+            <label for="addServerAllowedBetty4Pack" class="input-group-addon" style="white-space: nowrap; width: 1px;">4-pack Bouncing Betty:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerAllowedBetty4Pack" ng-model="data.settings.addServer.allowed.powerups.betty4pack" />
+            </span>
+        </div>
+        <div class="input-group">
+            <label for="addServerAllowedChaff" class="input-group-addon" style="white-space: nowrap; width: 1px;">Chaff:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerAllowedChaff" ng-model="data.settings.addServer.allowed.powerups.chaff" />
+            </span>
+        </div>
+        <div class="input-group">
+            <label for="addServerAllowedCloak" class="input-group-addon" style="white-space: nowrap; width: 1px;">Cloak:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerAllowedCloak" ng-model="data.settings.addServer.allowed.powerups.cloak" />
+            </span>
+        </div>
+        <div class="input-group">
+            <label for="addServerAllowedConverter" class="input-group-addon" style="white-space: nowrap; width: 1px;">Converter:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerAllowedConverter" ng-model="data.settings.addServer.allowed.powerups.converter" />
+            </span>
+        </div>
+        <div class="input-group">
+            <label for="addServerAllowedEnergy" class="input-group-addon" style="white-space: nowrap; width: 1px;">Energy:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerAllowedEnergy" ng-model="data.settings.addServer.allowed.powerups.energy" />
+            </span>
+        </div>
+        <div class="input-group">
+            <label for="addServerAllowedGunboyPowerup" class="input-group-addon" style="white-space: nowrap; width: 1px;">Gunboy:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerAllowedGunboyPowerup" ng-model="data.settings.addServer.allowed.powerups.gunboypowerup" />
+            </span>
+        </div>
+        <div class="input-group">
+            <label for="addServerAllowedHeadlightPowerup" class="input-group-addon" style="white-space: nowrap; width: 1px;">Headlight:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerAllowedHeadlightPowerup" ng-model="data.settings.addServer.allowed.powerups.headlightpowerup" />
+            </span>
+        </div>
+        <div class="input-group">
+            <label for="addServerAllowedInvisiblePowerup" class="input-group-addon" style="white-space: nowrap; width: 1px;">Invisible Powerup:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerAllowedInvisiblePowerup" ng-model="data.settings.addServer.allowed.powerups.invisiblepowerup" />
+            </span>
+        </div>
+        <div class="input-group">
+            <label for="addServerAllowedInvulnerability" class="input-group-addon" style="white-space: nowrap; width: 1px;">Invulnerability:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerAllowedInvulnerability" ng-model="data.settings.addServer.allowed.powerups.invulnerability" />
+            </span>
+        </div>
+        <div class="input-group">
+            <label for="addServerAllowedMassDriverAmmo" class="input-group-addon" style="white-space: nowrap; width: 1px;">Mass Driver Ammo:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerAllowedMassDriverAmmo" ng-model="data.settings.addServer.allowed.powerups.massdriverammo" />
+            </span>
+        </div>
+        <div class="input-group">
+            <label for="addServerAllowedNapalmTank" class="input-group-addon" style="white-space: nowrap; width: 1px;">Napalm Tank:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerAllowedNapalmTank" ng-model="data.settings.addServer.allowed.powerups.napalmtank" />
+            </span>
+        </div>
+        <div class="input-group">
+            <label for="addServerAllowedProxMinePowerup" class="input-group-addon" style="white-space: nowrap; width: 1px;">Proximity Mine:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerAllowedProxMinePowerup" ng-model="data.settings.addServer.allowed.powerups.proxminepowerup" />
+            </span>
+        </div>
+        <div class="input-group">
+            <label for="addServerAllowedQuadLaser" class="input-group-addon" style="white-space: nowrap; width: 1px;">Quad Laser:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerAllowedQuadLaser" ng-model="data.settings.addServer.allowed.powerups.quadlaser" />
+            </span>
+        </div>
+        <div class="input-group">
+            <label for="addServerAllowedRapidFire" class="input-group-addon" style="white-space: nowrap; width: 1px;">Rapid Fire:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerAllowedRapidFire" ng-model="data.settings.addServer.allowed.powerups.rapidfire" />
+            </span>
+        </div>
+        <div class="input-group">
+            <label for="addServerAllowedSeeker3Pack" class="input-group-addon" style="white-space: nowrap; width: 1px;">3-pack Seeker Mine:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerAllowedSeeker3Pack" ng-model="data.settings.addServer.allowed.powerups.seeker3pack" />
+            </span>
+        </div>
+        <div class="input-group">
+            <label for="addServerAllowedShield" class="input-group-addon" style="white-space: nowrap; width: 1px;">Shield:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerAllowedShield" ng-model="data.settings.addServer.allowed.powerups.shield" />
+            </span>
+        </div>
+        <div class="input-group">
+            <label for="addServerAllowedVaussClip" class="input-group-addon" style="white-space: nowrap; width: 1px;">Vauss Clip:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerAllowedVaussClip" ng-model="data.settings.addServer.allowed.powerups.vaussclip" />
+            </span>
+        </div>
+    </div>
+    <div class="col-xs-6">
+        <div class="input-group">
+            <label for="addServerAllowedAntivirusProgram" class="input-group-addon" style="white-space: nowrap; width: 1px;">Antivirus Program:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerAllowedAntivirusProgram" ng-model="data.settings.addServer.allowed.miscellaneous.antivirusprogram" />
+            </span>
+        </div>
+        <div class="input-group">
+            <label for="addServerAllowedBivouacKey" class="input-group-addon" style="white-space: nowrap; width: 1px;">Bivouac Key:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerAllowedBivouacKey" ng-model="data.settings.addServer.allowed.miscellaneous.bivouackey" />
+            </span>
+        </div>
+        <div class="input-group">
+            <label for="addServerAllowedBlackBox" class="input-group-addon" style="white-space: nowrap; width: 1px;">Black Box:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerAllowedBlackBox" ng-model="data.settings.addServer.allowed.miscellaneous.blackbox" />
+            </span>
+        </div>
+        <div class="input-group">
+            <label for="addServerAllowedBuddyAntivirus" class="input-group-addon" style="white-space: nowrap; width: 1px;">Buddy Antivirus:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerAllowedBuddyAntivirus" ng-model="data.settings.addServer.allowed.miscellaneous.buddyantivirus" />
+            </span>
+        </div>
+        <div class="input-group">
+            <label for="addServerAllowedBuddyAssist" class="input-group-addon" style="white-space: nowrap; width: 1px;">Buddy Assist:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerAllowedBuddyAssist" ng-model="data.settings.addServer.allowed.miscellaneous.buddyassist" />
+            </span>
+        </div>
+        <div class="input-group">
+            <label for="addServerAllowedBuddyControl" class="input-group-addon" style="white-space: nowrap; width: 1px;">Buddy Control:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerAllowedBuddyControl" ng-model="data.settings.addServer.allowed.miscellaneous.buddycontrol" />
+            </span>
+        </div>
+        <div class="input-group">
+            <label for="addServerAllowedBuddyExtinguisher" class="input-group-addon" style="white-space: nowrap; width: 1px;">Buddy Extinguisher:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerAllowedBuddyExtinguisher" ng-model="data.settings.addServer.allowed.miscellaneous.buddyextinguisher" />
+            </span>
+        </div>
+        <div class="input-group">
+            <label for="addServerAllowedBuddySpeed" class="input-group-addon" style="white-space: nowrap; width: 1px;">Buddy Speed:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerAllowedBuddySpeed" ng-model="data.settings.addServer.allowed.miscellaneous.buddyspeed" />
+            </span>
+        </div>
+        <div class="input-group">
+            <label for="addServerAllowedBuddyWingnut" class="input-group-addon" style="white-space: nowrap; width: 1px;">Buddy Wingnut:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerAllowedBuddyWingnut" ng-model="data.settings.addServer.allowed.miscellaneous.buddywingnut" />
+            </span>
+        </div>
+        <div class="input-group">
+            <label for="addServerAllowedBuildersIcon" class="input-group-addon" style="white-space: nowrap; width: 1px;">Builder's Icon:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerAllowedBuildersIcon" ng-model="data.settings.addServer.allowed.miscellaneous.buildersicon" />
+            </span>
+        </div>
+        <div class="input-group">
+            <label for="addServerAllowedBypassConnector" class="input-group-addon" style="white-space: nowrap; width: 1px;">Bypass Connector:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerAllowedBypassConnector" ng-model="data.settings.addServer.allowed.miscellaneous.bypassconnector" />
+            </span>
+        </div>
+        <div class="input-group">
+            <label for="addServerAllowedCameraMonitor" class="input-group-addon" style="white-space: nowrap; width: 1px;">Camera Monitor:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerAllowedCameraMonitor" ng-model="data.settings.addServer.allowed.miscellaneous.cameramonitor" />
+            </span>
+        </div>
+        <div class="input-group">
+            <label for="addServerAllowedCollectorsIcon" class="input-group-addon" style="white-space: nowrap; width: 1px;">Collector's Icon:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerAllowedCollectorsIcon" ng-model="data.settings.addServer.allowed.miscellaneous.collectorsicon" />
+            </span>
+        </div>
+        <div class="input-group">
+            <label for="addServerAllowedCovertTransmitter" class="input-group-addon" style="white-space: nowrap; width: 1px;">Covert Transmitter:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerAllowedCovertTransmitter" ng-model="data.settings.addServer.allowed.miscellaneous.coverttransmitter" />
+            </span>
+        </div>
+        <div class="input-group">
+            <label for="addServerAllowedDamKey" class="input-group-addon" style="white-space: nowrap; width: 1px;">Dam Key 1:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerAllowedDamKey" ng-model="data.settings.addServer.allowed.miscellaneous.damkey" />
+            </span>
+        </div>
+        <div class="input-group">
+            <label for="addServerAllowedDamKey2" class="input-group-addon" style="white-space: nowrap; width: 1px;">Dam Key 2:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerAllowedDamKey2" ng-model="data.settings.addServer.allowed.miscellaneous.damkey2" />
+            </span>
+        </div>
+        <div class="input-group">
+            <label for="addServerAllowedDamKey3" class="input-group-addon" style="white-space: nowrap; width: 1px;">Dam Key 3:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerAllowedDamKey3" ng-model="data.settings.addServer.allowed.miscellaneous.damkey3" />
+            </span>
+        </div>
+        <div class="input-group">
+            <label for="addServerAllowedDamKey4" class="input-group-addon" style="white-space: nowrap; width: 1px;">Dam Key 4:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerAllowedDamKey4" ng-model="data.settings.addServer.allowed.miscellaneous.damkey4" />
+            </span>
+        </div>
+        <div class="input-group">
+            <label for="addServerAllowedDataCartridge" class="input-group-addon" style="white-space: nowrap; width: 1px;">Data Cartridge:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerAllowedDataCartridge" ng-model="data.settings.addServer.allowed.miscellaneous.datacartridge" />
+            </span>
+        </div>
+        <div class="input-group">
+            <label for="addServerAllowedDataInterface" class="input-group-addon" style="white-space: nowrap; width: 1px;">Data Interface:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerAllowedDataInterface" ng-model="data.settings.addServer.allowed.miscellaneous.datainterface" />
+            </span>
+        </div>
+        <div class="input-group">
+            <label for="addServerAllowedDataJournal" class="input-group-addon" style="white-space: nowrap; width: 1px;">Data Journal:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerAllowedDataJournal" ng-model="data.settings.addServer.allowed.miscellaneous.datajournal" />
+            </span>
+        </div>
+        <div class="input-group">
+            <label for="addServerAllowedDataVaultKey" class="input-group-addon" style="white-space: nowrap; width: 1px;">Data Vault Key:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerAllowedDataVaultKey" ng-model="data.settings.addServer.allowed.miscellaneous.datavaultkey" />
+            </span>
+        </div>
+        <div class="input-group">
+            <label for="addServerAllowedEmitterLens" class="input-group-addon" style="white-space: nowrap; width: 1px;">EmitterLens:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerAllowedEmitterLens" ng-model="data.settings.addServer.allowed.miscellaneous.emitterlens" />
+            </span>
+        </div>
+        <div class="input-group">
+            <label for="addServerAllowedEnginePieceBlower" class="input-group-addon" style="white-space: nowrap; width: 1px;">Engine Piece Blower:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerAllowedEnginePieceBlower" ng-model="data.settings.addServer.allowed.miscellaneous.enginepieceblower" />
+            </span>
+        </div>
+        <div class="input-group">
+            <label for="addServerAllowedEnginePieceSquare" class="input-group-addon" style="white-space: nowrap; width: 1px;">Engine Piece Square:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerAllowedEnginePieceSquare" ng-model="data.settings.addServer.allowed.miscellaneous.enginepiecesquare" />
+            </span>
+        </div>
+        <div class="input-group">
+            <label for="addServerAllowedEntropyVirus" class="input-group-addon" style="white-space: nowrap; width: 1px;">Entropy Virus:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerAllowedEntropyVirus" ng-model="data.settings.addServer.allowed.miscellaneous.entropyvirus" />
+            </span>
+        </div>
+        <div class="input-group">
+            <label for="addServerAllowedEquipmentRoomKey" class="input-group-addon" style="white-space: nowrap; width: 1px;">Equipment Room Key:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerAllowedEquipmentRoomKey" ng-model="data.settings.addServer.allowed.miscellaneous.equipmentroomkey" />
+            </span>
+        </div>
+        <div class="input-group">
+            <label for="addServerAllowedFlagBlue" class="input-group-addon" style="white-space: nowrap; width: 1px;">Flag Blue:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerAllowedFlagBlue" ng-model="data.settings.addServer.allowed.miscellaneous.flagblue" />
+            </span>
+        </div>
+        <div class="input-group">
+            <label for="addServerAllowedFlagGreen" class="input-group-addon" style="white-space: nowrap; width: 1px;">Flag Green:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerAllowedFlagGreen" ng-model="data.settings.addServer.allowed.miscellaneous.flaggreen" />
+            </span>
+        </div>
+        <div class="input-group">
+            <label for="addServerAllowedFlagRed" class="input-group-addon" style="white-space: nowrap; width: 1px;">Flag Red:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerAllowedFlagRed" ng-model="data.settings.addServer.allowed.miscellaneous.flagred" />
+            </span>
+        </div>
+        <div class="input-group">
+            <label for="addServerAllowedFlagYellow" class="input-group-addon" style="white-space: nowrap; width: 1px;">Flag Yellow:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerAllowedFlagYellow" ng-model="data.settings.addServer.allowed.miscellaneous.flagyellow" />
+            </span>
+        </div>
+        <div class="input-group">
+            <label for="addServerAllowedForceFieldPasskey1" class="input-group-addon" style="white-space: nowrap; width: 1px;">Force Field Passkey 1:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerAllowedForceFieldPasskey1" ng-model="data.settings.addServer.allowed.miscellaneous.forcefieldpasskey1" />
+            </span>
+        </div>
+        <div class="input-group">
+            <label for="addServerAllowedFuse" class="input-group-addon" style="white-space: nowrap; width: 1px;">Fuse:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerAllowedFuse" ng-model="data.settings.addServer.allowed.miscellaneous.fuse" />
+            </span>
+        </div>
+        <div class="input-group">
+            <label for="addServerAllowedG1SecurityPass" class="input-group-addon" style="white-space: nowrap; width: 1px;">G-1 Security Pass:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerAllowedG1SecurityPass" ng-model="data.settings.addServer.allowed.miscellaneous.g1securitypass" />
+            </span>
+        </div>
+        <div class="input-group">
+            <label for="addServerAllowedHoardOrb" class="input-group-addon" style="white-space: nowrap; width: 1px;">Hoard Orb:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerAllowedHoardOrb" ng-model="data.settings.addServer.allowed.miscellaneous.hoardorb" />
+            </span>
+        </div>
+        <div class="input-group">
+            <label for="addServerAllowedHyperOrb" class="input-group-addon" style="white-space: nowrap; width: 1px;">Hyper-Orb:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerAllowedHyperOrb" ng-model="data.settings.addServer.allowed.miscellaneous.hyperorb" />
+            </span>
+        </div>
+        <div class="input-group">
+            <label for="addServerAllowedKeyCardIndustrial" class="input-group-addon" style="white-space: nowrap; width: 1px;">Key Card Industrial:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerAllowedKeyCardIndustrial" ng-model="data.settings.addServer.allowed.miscellaneous.keycardindustrial" />
+            </span>
+        </div>
+        <div class="input-group">
+            <label for="addServerAllowedLandPoint" class="input-group-addon" style="white-space: nowrap; width: 1px;">Land Point:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerAllowedLandPoint" ng-model="data.settings.addServer.allowed.miscellaneous.landpoint" />
+            </span>
+        </div>
+        <div class="input-group">
+            <label for="addServerAllowedLev1BadKey" class="input-group-addon" style="white-space: nowrap; width: 1px;">Level 1 Bad Key:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerAllowedLev1BadKey" ng-model="data.settings.addServer.allowed.miscellaneous.lev1badkey" />
+            </span>
+        </div>
+        <div class="input-group">
+            <label for="addServerAllowedLevel0Key" class="input-group-addon" style="white-space: nowrap; width: 1px;">Level 0 Key:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerAllowedLevel0Key" ng-model="data.settings.addServer.allowed.miscellaneous.level0key" />
+            </span>
+        </div>
+        <div class="input-group">
+            <label for="addServerAllowedMemoryPlasma" class="input-group-addon" style="white-space: nowrap; width: 1px;">Memory Plasma:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerAllowedMemoryPlasma" ng-model="data.settings.addServer.allowed.miscellaneous.memoryplasma" />
+            </span>
+        </div>
+        <div class="input-group">
+            <label for="addServerAllowedMystery" class="input-group-addon" style="white-space: nowrap; width: 1px;">Mystery:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerAllowedMystery" ng-model="data.settings.addServer.allowed.miscellaneous.mystery" />
+            </span>
+        </div>
+        <div class="input-group">
+            <label for="addServerAllowedPowerBall" class="input-group-addon" style="white-space: nowrap; width: 1px;">Power Ball:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerAllowedPowerBall" ng-model="data.settings.addServer.allowed.miscellaneous.powerball" />
+            </span>
+        </div>
+        <div class="input-group">
+            <label for="addServerAllowedPriestsIcon" class="input-group-addon" style="white-space: nowrap; width: 1px;">Priest's Icon:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerAllowedPriestsIcon" ng-model="data.settings.addServer.allowed.miscellaneous.priestsicon" />
+            </span>
+        </div>
+        <div class="input-group">
+            <label for="addServerAllowedR1SecurityPass" class="input-group-addon" style="white-space: nowrap; width: 1px;">R-1 Security Pass:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerAllowedR1SecurityPass" ng-model="data.settings.addServer.allowed.miscellaneous.r1securitypass" />
+            </span>
+        </div>
+        <div class="input-group">
+            <label for="addServerAllowedReconInterface" class="input-group-addon" style="white-space: nowrap; width: 1px;">Recon Interface:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerAllowedReconInterface" ng-model="data.settings.addServer.allowed.miscellaneous.reconinterface" />
+            </span>
+        </div>
+        <div class="input-group">
+            <label for="addServerAllowedRgCartridge" class="input-group-addon" style="white-space: nowrap; width: 1px;">RG Cartridge:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerAllowedRgCartridge" ng-model="data.settings.addServer.allowed.miscellaneous.rgcartridge" />
+            </span>
+        </div>
+        <div class="input-group">
+            <label for="addServerAllowedSanctumKey" class="input-group-addon" style="white-space: nowrap; width: 1px;">Sanctum Key:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerAllowedSanctumKey" ng-model="data.settings.addServer.allowed.miscellaneous.sanctumkey" />
+            </span>
+        </div>
+        <div class="input-group">
+            <label for="addServerAllowedSeismicDisruptor" class="input-group-addon" style="white-space: nowrap; width: 1px;">Seismic Disruptor:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerAllowedSeismicDisruptor" ng-model="data.settings.addServer.allowed.miscellaneous.seismicdisruptor" />
+            </span>
+        </div>
+        <div class="input-group">
+            <label for="addServerAllowedShipBlueFlag" class="input-group-addon" style="white-space: nowrap; width: 1px;">Ship Blue Flag:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerAllowedShipBlueFlag" ng-model="data.settings.addServer.allowed.miscellaneous.shipblueflag" />
+            </span>
+        </div>
+        <div class="input-group">
+            <label for="addServerAllowedShipGreenFlag" class="input-group-addon" style="white-space: nowrap; width: 1px;">Ship Green Flag:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerAllowedShipGreenFlag" ng-model="data.settings.addServer.allowed.miscellaneous.shipgreenflag" />
+            </span>
+        </div>
+        <div class="input-group">
+            <label for="addServerAllowedShipRedFlag" class="input-group-addon" style="white-space: nowrap; width: 1px;">Ship Red Flag:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerAllowedShipRedFlag" ng-model="data.settings.addServer.allowed.miscellaneous.shipredflag" />
+            </span>
+        </div>
+        <div class="input-group">
+            <label for="addServerAllowedShipYellowFlag" class="input-group-addon" style="white-space: nowrap; width: 1px;">Ship Yellow Flag:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerAllowedShipYellowFlag" ng-model="data.settings.addServer.allowed.miscellaneous.shipyellowflag" />
+            </span>
+        </div>
+        <div class="input-group">
+            <label for="addServerAllowedSweitzer" class="input-group-addon" style="white-space: nowrap; width: 1px;">Sweitzer:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerAllowedSweitzer" ng-model="data.settings.addServer.allowed.miscellaneous.sweitzer" />
+            </span>
+        </div>
+        <div class="input-group">
+            <label for="addServerAllowedTheifAutomap" class="input-group-addon" style="white-space: nowrap; width: 1px;">Thief Automap:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerAllowedTheifAutomap" ng-model="data.settings.addServer.allowed.miscellaneous.thiefautomap" />
+            </span>
+        </div>
+        <div class="input-group">
+            <label for="addServerAllowedVirusSample" class="input-group-addon" style="white-space: nowrap; width: 1px;">Virus Sample:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerAllowedVirusSample" ng-model="data.settings.addServer.allowed.miscellaneous.virussample" />
+            </span>
+        </div>
+        <div class="input-group">
+            <label for="addServerAllowedX1SecurityPass" class="input-group-addon" style="white-space: nowrap; width: 1px;">X-1 Security Pass:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerAllowedX1SecurityPass" ng-model="data.settings.addServer.allowed.miscellaneous.x1securitypass" />
+            </span>
+        </div>
+        <div class="input-group">
+            <label for="addServerAllowedY1SecurityPass" class="input-group-addon" style="white-space: nowrap; width: 1px;">Y-1 Security Pass:</label>
+            <span class="input-group-addon" style="width: 100%; text-align: left;">
+                <input type="checkbox" id="addServerAllowedY1SecurityPass" ng-model="data.settings.addServer.allowed.miscellaneous.y1securitypass" />
+            </span>
+        </div>
+    </div>
+</div>

@@ -164,6 +164,7 @@ module.exports = function() {
                                 settings.default.game.timeLimitValid = true;
                                 settings.default.game.respawnTimeValid = true;
                                 settings.default.game.audioTauntDelayValid = true;
+                                settings.default.allowed.shipsValid = true;
                                 settings.addServer = JSON.parse(JSON.stringify(settings.default));
 
                                 // Get network interfaces.
