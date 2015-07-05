@@ -221,6 +221,25 @@ module.exports = function() {
                             }
                         });
                         break;
+                    case "launchserver":
+                        var server = new Launcher();
+                        server.options = message.settings;
+                        server.createServer(function(err) {
+                            if (err) {
+                                ws.send(JSON.stringify({
+                                    message: "warning",
+                                    text: "There was an error launching the server.",
+                                    err: err
+                                }));
+                                return;
+                            }
+
+                            ws.send(JSON.stringify({
+                                message: "serverlaunched",
+                                port: message.settings.server.port
+                            }));
+                        });
+                        break;
                     case "missions":
                         if (settings.descent3.pathValid) {
                             fs.readdir(path.join(settings.descent3.path, "missions"), function(err, files) {

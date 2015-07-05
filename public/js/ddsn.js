@@ -354,6 +354,14 @@ var app = angular.module("ddsn", []),
             data.settings.addServer.allowed.shipsValid = data.settings.addServer.allowed.ships.blackpyro || data.settings.addServer.allowed.ships.magnumaht || data.settings.addServer.allowed.ships.phoenix || data.settings.addServer.allowed.ships.pyrogl;
         };
 
+        $scope.launchServer = function() {
+            data.settings.addServer.server.directory = data.settings.descent3.path;
+            ws.send(JSON.stringify({
+                message: "launchserver",
+                settings: data.settings.addServer
+            }));
+        };
+
         $scope.updateSettingsDescent3Path = function() {
             ws.send(JSON.stringify({
                 message: "settings.descent3.path",
@@ -413,6 +421,7 @@ var app = angular.module("ddsn", []),
                         scope.$apply();
                         break;
                     case "warning":
+                        console.log(message);
                         // TODO: Handle warning
                         break;
                 }
