@@ -476,6 +476,10 @@ var app = angular.module("ddsn", []),
                 var message = JSON.parse(ev.data);
 
                 switch (message.message) {
+                    case "initservers":
+                        data.servers = message.servers;
+                        scope.$apply();
+                        break;
                     case "missions":
                         data.missions = message.missions;
                         data.loadingMissions = false;
@@ -490,8 +494,16 @@ var app = angular.module("ddsn", []),
                             if (!server) {
                                 return;
                             }
+console.log(message.port);
+                            if (data.currentServer.settings.server.port === message.port) {
+                                data.currentServer = null;
+                                if (data.serverTab === "server") {
+                                    data.serverTab = "dashboard";
+                                }
+                            }
 
                             data.servers.splice(data.servers.indexOf(server), 1);
+                            server = null;
 
                             // TODO: Notification that the server was closed.
 

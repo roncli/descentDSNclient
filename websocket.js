@@ -19,7 +19,10 @@ module.exports = function() {
     d.run(function() {
         var settings = {},
             writingSettings = false,
-            servers = [],
+            servers = {
+                data: [],
+                servers: []
+            },
             writeSettingsCallback,
 
             titleCase = function(text) {
@@ -51,6 +54,7 @@ module.exports = function() {
             getConnectionAndGameTypes = function(d3path, callback) {
                 var connectionTypes = [],
                     gameTypes = [];
+
                 fs.readdir(path.join(d3path, "online"), function(err, connectionFiles) {
                     if (err) {
                         callback(err);
@@ -241,10 +245,17 @@ module.exports = function() {
                                 });
                             }
                         });
+
+                        // Return currently active servers.
+                        ws.send(JSON.stringify({
+                            message: "initservers",
+                            servers: servers.data
+                        }));
+
                         break;
                     case "launchserver":
                         randomPassword(function(err, password) {
-                            var launcher;
+                            var launcher, data, server;
 
                             if (err) {
                                 ws.send(JSON.stringify({
@@ -261,9 +272,15 @@ module.exports = function() {
                             launcher.options.game.consolePassword = password;
                             launcher.options.game.remoteConsolePort = launcher.options.server.port;
 
-                            launcher.createServer(function(err) {
-                                var server;
+                            data = {
+                                settings: launcher.options,
+                                console: [],
+                                loading: true
+                            };
 
+                            servers.data.push(data);
+
+                            launcher.createServer(function(err) {
                                 if (err) {
                                     ws.send(JSON.stringify({
                                         message: "warning",
@@ -280,7 +297,22 @@ module.exports = function() {
 
                                 server = new Server(launcher.options, wss);
 
-                                servers.push(server);
+                                server.on("connected", function() {
+                                    data.loading = false;
+                                });
+
+                                server.on("raw", function(line) {
+                                    data.console.push(line);
+                                });
+
+                                server.on("close", function() {
+                                    servers.data.splice(servers.data.indexOf(data), 1);
+                                    servers.servers.splice(servers.servers.indexOf(server), 1);
+                                    server = null;
+                                    data = null;
+                                });
+
+                                servers.servers.push(server);
                             });
                         });
                         break;

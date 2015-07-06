@@ -1,18 +1,22 @@
-var Console = require("descent3console");
+var events = require("events"),
+    util = require("util"),
+    Console = require("descent3console");
 
 function getConsole(server, port, password) {
     "use strict";
 
-    var console = new Console();
+    var d3console = new Console();
 
-    console.options.server = server;
-    console.options.port = port;
-    console.options.password = password;
-    return console;
+    d3console.options.server = server;
+    d3console.options.port = port;
+    d3console.options.password = password;
+    return d3console;
 }
 
 function Server(settings, wss) {
     "use strict";
+
+    events.EventEmitter.call(this);
 
     this.settings = settings;
     this.wss = wss;
@@ -24,6 +28,8 @@ function Server(settings, wss) {
     return this;
 }
 
+util.inherits(Server, events.EventEmitter);
+
 Server.prototype.connect = function() {
     "use strict";
 
@@ -32,10 +38,11 @@ Server.prototype.connect = function() {
     this.console = getConsole(this.settings.server.ip || "localhost", this.settings.game.remoteConsolePort, this.settings.game.consolePassword);
 
     this.console.on("connected", function() {
+        server.emit("connected");
         server.init();
     });
 
-    this.console.once("error", function(err) {
+    this.console.once("error", function() {
         server.console = undefined;
 
         if (new Date().getTime() > server.startTime + 60000) {
@@ -73,6 +80,8 @@ Server.prototype.init = function() {
             port: server.settings.server.port,
             data: line
         });
+
+        server.emit("raw", line);
     });
 
     this.console.on("close", function() {
@@ -81,6 +90,10 @@ Server.prototype.init = function() {
             reason: "close",
             port: server.settings.server.port
         });
+
+        server.console.removeAllListeners("close");
+        server.console.close();
+        server.emit("close");
     });
 
     this.console.on("end", function() {
@@ -89,6 +102,10 @@ Server.prototype.init = function() {
             reason: "end",
             port: server.settings.server.port
         });
+
+        server.console.removeAllListeners("end");
+        server.console.close();
+        server.emit("close");
     });
 
     this.console.on("timeout", function() {
@@ -97,6 +114,23 @@ Server.prototype.init = function() {
             reason: "timeout",
             port: server.settings.server.port
         });
+
+        server.console.removeAllListeners("timeout");
+        server.console.close();
+        server.emit("close");
+    });
+
+    this.console.on("error", function(err) {
+        server.wss.broadcast({
+            message: "server.close",
+            reason: "error",
+            err: err,
+            port: server.settings.server.port
+        });
+
+        server.console.removeAllListeners("error");
+        server.console.close();
+        server.emit("close");
     });
 };
 
