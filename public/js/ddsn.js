@@ -4,6 +4,7 @@
 var app = angular.module("ddsn", []),
     data = {
         serverTab: "news",
+        serverMenuTab: "scoreboard",
         addServerMenuTab: "saved",
         settingsMenuTab: "descent3",
         settings: {
@@ -18,7 +19,23 @@ var app = angular.module("ddsn", []),
             {difficulty: 3, name: "Ace"},
             {difficulty: 4, name: "Insane"}
         ],
-        selectMissionToggle: true
+        selectMissionToggle: true,
+        servers: []
+    },
+
+    getServer = function(port, callback) {
+        "use strict";
+
+        var server = data.servers.filter(function(item) {
+            return item.settings.server.port === port;
+        });
+
+        if (server) {
+            callback(server[0]);
+            return;
+        }
+
+        callback();
     };
 
 (function() {
@@ -79,6 +96,41 @@ var app = angular.module("ddsn", []),
         return {
             restrict: "E",
             templateUrl: "/templates/dashboard.htm"
+        };
+    });
+
+    app.directive("server", function() {
+        return {
+            restrict: "E",
+            templateUrl: "/templates/server.htm"
+        };
+    });
+
+    app.directive("serverScoreboard", function() {
+        return {
+            restrict: "E",
+            templateUrl: "/templates/server-scoreboard.htm"
+        };
+    });
+
+    app.directive("serverConsole", function() {
+        return {
+            restrict: "E",
+            templateUrl: "/templates/server-console.htm"
+        };
+    });
+
+    app.directive("serverLog", function() {
+        return {
+            restrict: "E",
+            templateUrl: "/templates/server-log.htm"
+        };
+    });
+
+    app.directive("serverModifications", function() {
+        return {
+            restrict: "E",
+            templateUrl: "/templates/server-modifications.htm"
         };
     });
 
@@ -202,21 +254,30 @@ var app = angular.module("ddsn", []),
             data.settings.addServer.server.addTrackerPort = undefined;
         };
 
-        $scope.openMenu = function(ev, screen) {
-            $("button.server-tab").removeClass("btn-success").addClass("btn-primary");
-            $(ev.currentTarget).removeClass("btn-primary").addClass("btn-success");
+        $scope.openMenu = function(screen) {
             data.serverTab = screen;
         };
 
-        $scope.openAddServer = function(ev, screen) {
-            $("button.add-server-menu-tab").removeClass("btn-success").addClass("btn-primary");
-            $(ev.currentTarget).removeClass("btn-primary").addClass("btn-success");
+        $scope.openServer = function(port) {
+            getServer(port, function(server) {
+                if (!server) {
+                    return;
+                }
+
+                data.serverTab = "server";
+                data.currentServer = server;
+            });
+        };
+
+        $scope.openServerMenu = function(screen) {
+            data.serverMenuTab = screen;
+        };
+
+        $scope.openAddServer = function(screen) {
             data.addServerMenuTab = screen;
         };
 
-        $scope.openSettings = function(ev, screen) {
-            $("button.settings-menu-tab").removeClass("btn-success").addClass("btn-primary");
-            $(ev.currentTarget).removeClass("btn-primary").addClass("btn-success");
+        $scope.openSettings = function(screen) {
             data.settingsMenuTab = screen;
         };
 
@@ -355,11 +416,28 @@ var app = angular.module("ddsn", []),
         };
 
         $scope.launchServer = function() {
+            var server;
+
             data.settings.addServer.server.directory = data.settings.descent3.path;
             ws.send(JSON.stringify({
                 message: "launchserver",
                 settings: data.settings.addServer
             }));
+
+            server = {
+                settings: JSON.parse(JSON.stringify(data.settings.addServer)),
+                console: [],
+                loading: true
+            };
+
+            data.servers.push(server);
+
+            data.servers.sort(function(a, b) {
+                return a.settings.server.port > b.settings.server.port ? 1 : -1;
+            });
+
+            data.currentServer = server;
+            data.serverTab = "server";
         };
 
         $scope.updateSettingsDescent3Path = function() {
@@ -395,8 +473,7 @@ var app = angular.module("ddsn", []),
             };
 
             ws.onmessage = function(ev) {
-                var message = JSON.parse(ev.data),
-                    key;
+                var message = JSON.parse(ev.data);
 
                 switch (message.message) {
                     case "missions":
@@ -408,13 +485,52 @@ var app = angular.module("ddsn", []),
                         data.loadingMissionPercent = message.percent;
                         scope.$apply();
                         break;
-                    case "settings":
-                        for (key in message.settings) {
-                            if (message.settings.hasOwnProperty(key)) {
-                                data.settings[key] = message.settings[key];
+                    case "server.close":
+                        getServer(message.port, function(server) {
+                            if (!server) {
+                                return;
                             }
-                        }
-                        scope.$apply();
+
+                            data.servers.splice(data.servers.indexOf(server), 1);
+
+                            // TODO: Notification that the server was closed.
+
+                            scope.$apply();
+                        });
+                        break;
+                    case "server.connected":
+                        getServer(message.port, function(server) {
+                            if (!server) {
+                                return;
+                            }
+
+                            server.loading = false;
+
+                            scope.$apply();
+                        });
+                        break;
+                    case "server.raw":
+                        getServer(message.port, function(server) {
+                            if (!server) {
+                                return;
+                            }
+
+                            server.console.push(message.data);
+
+                            scope.$apply();
+                        });
+                        break;
+                    case "settings":
+                        (function() {
+                            var key;
+
+                            for (key in message.settings) {
+                                if (message.settings.hasOwnProperty(key)) {
+                                    data.settings[key] = message.settings[key];
+                                }
+                            }
+                            scope.$apply();
+                        }());
                         break;
                     case "settings.descent3.pathValid":
                         data.settings.descent3.pathValid = message.valid;

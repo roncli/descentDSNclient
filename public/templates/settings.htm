@@ -1,9 +1,9 @@
 <ul class="nav nav-pills">
     <li role="presentation">
-        <button class="settings-menu-tab btn btn-success descent3" ng-click="openSettings($event, 'descent3')"><span class="glyphicon glyphicon-globe"></span> Descent 3</button>
+        <button ng-class="{true: 'btn btn-success', false: 'btn btn-primary'}[data.settingsMenuTab === 'descent3']" ng-click="openSettings('descent3')"><span class="glyphicon glyphicon-globe"></span> Descent 3</button>
     </li>
     <li role="presentation">
-        <button class="settings-menu-tab btn btn-primary modifications" ng-click="openSettings($event, 'modifications')"><span class="glyphicon glyphicon-tasks"></span> Modifications</button>
+        <button ng-class="{true: 'btn btn-success', false: 'btn btn-primary'}[data.settingsMenuTab === 'modifications']" ng-click="openSettings('modifications')"><span class="glyphicon glyphicon-tasks"></span> Modifications</button>
     </li>
 </ul><br />
 <settings-descent3 ng-if="data.settingsMenuTab === 'descent3'"></settings-descent3>

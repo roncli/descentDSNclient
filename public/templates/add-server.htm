@@ -1,21 +1,21 @@
 <ul class="nav nav-pills">
     <li role="presentation">
-        <button class="add-server-menu-tab btn btn-success saved" ng-click="openAddServer($event, 'saved')"><span class="glyphicon glyphicon-hdd"></span> Saved Servers</button>
+        <button ng-class="{true: 'btn btn-success', false: 'btn btn-primary'}[data.addServerMenuTab === 'saved']" ng-click="openAddServer('saved')"><span class="glyphicon glyphicon-hdd"></span> Saved Servers</button>
     </li>
     <li role="presentation">
-        <button class="add-server-menu-tab btn btn-primary server" ng-click="openAddServer($event, 'server')"><span class="glyphicon glyphicon-wrench"></span> Server Options</button>
+        <button ng-class="{true: 'btn btn-success', false: 'btn btn-primary'}[data.addServerMenuTab === 'server']" ng-click="openAddServer('server')"><span class="glyphicon glyphicon-wrench"></span> Server Options</button>
     </li>
     <li role="presentation">
-        <button class="add-server-menu-tab btn btn-primary game" ng-click="openAddServer($event, 'game')"><span class="glyphicon glyphicon-th-list"></span> Game Options</button>
+        <button ng-class="{true: 'btn btn-success', false: 'btn btn-primary'}[data.addServerMenuTab === 'game']" ng-click="openAddServer('game')"><span class="glyphicon glyphicon-th-list"></span> Game Options</button>
     </li>
     <li role="presentation">
-        <button class="add-server-menu-tab btn btn-primary allowed" ng-click="openAddServer($event, 'allowed')"><span class="glyphicon glyphicon-ok"></span> Allowed Objects</button>
+        <button ng-class="{true: 'btn btn-success', false: 'btn btn-primary'}[data.addServerMenuTab === 'allowed']" ng-click="openAddServer('allowed')"><span class="glyphicon glyphicon-ok"></span> Allowed Objects</button>
     </li>
     <li role="presentation">
-        <button class="add-server-menu-tab btn btn-primary modifications" ng-click="openAddServer($event, 'modifications')"><span class="glyphicon glyphicon-tasks"></span> Modifications</button>
+        <button ng-class="{true: 'btn btn-success', false: 'btn btn-primary'}[data.addServerMenuTab === 'modifications']" ng-click="openAddServer('modifications')"><span class="glyphicon glyphicon-tasks"></span> Modifications</button>
     </li>
     <li role="presentation">
-        <button class="add-server-menu-tab btn btn-primary launch" ng-click="openAddServer($event, 'launch')"><span class="glyphicon glyphicon-share"></span> Launch Server</button>
+        <button ng-class="{true: 'btn btn-success', false: 'btn btn-primary'}[data.addServerMenuTab === 'launch']" ng-click="openAddServer('launch')"><span class="glyphicon glyphicon-share"></span> Launch Server</button>
     </li>
 </ul><br />
 <add-server-saved ng-if="data.addServerMenuTab === 'saved'"></add-server-saved>

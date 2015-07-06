@@ -1,17 +1,17 @@
 <ul class="nav nav-pills">
     <li role="presentation">
-        <button class="server-tab btn btn-success" ng-click="openMenu($event, 'news')"><span class="glyphicon glyphicon-home"></span> News</button>
+        <button ng-class="{true: 'btn btn-success', false: 'btn btn-primary'}[data.serverTab === 'news']" ng-click="openMenu('news')"><span class="glyphicon glyphicon-home"></span> News</button>
     </li>
     <li role="presentation" ng-if="data.settings.descent3.pathValid">
-        <button class="server-tab btn btn-primary" ng-click="openMenu($event, 'dashboard')"><span class="glyphicon glyphicon-dashboard"></span> Dashboard</button>
+        <button ng-class="{true: 'btn btn-success', false: 'btn btn-primary'}[data.serverTab === 'dashboard']" ng-click="openMenu('dashboard')"><span class="glyphicon glyphicon-dashboard"></span> Dashboard</button>
     </li>
-    <li role="presentation" ng-if="data.settings.descent3.pathValid" ng-repeat="server in data.servers">
-        <button class="server-tab btn btn-primary server" ng-click="openServer($event, server.port)">{{server.gameName}} <span class="glyphicon glyphicon-arrow-right"></span> {{server.port}}</button>
+    <li role="presentation" ng-repeat="server in data.servers">
+        <button ng-class="{true: 'btn btn-success', false: 'btn btn-primary'}[data.serverTab === 'server' && data.currentServer && data.currentServer.settings.server.port === server.settings.server.port]" ng-click="openServer(server.settings.server.port)">{{server.settings.game.gameName}} <span class="glyphicon glyphicon-arrow-right"></span> {{server.settings.server.port}}</button>
     </li>
     <li role="presentation" ng-if="data.settings.descent3.pathValid">
-        <button class="server-tab btn btn-primary" ng-click="openMenu($event, 'addServer')"><span class="glyphicon glyphicon-plus"></span> Add Server</button>
+        <button ng-class="{true: 'btn btn-success', false: 'btn btn-primary'}[data.serverTab === 'addServer']" ng-click="openMenu('addServer')"><span class="glyphicon glyphicon-plus"></span> Add Server</button>
     </li>
     <li role="presentation">
-        <button class="server-tab btn btn-primary" ng-click="openMenu($event, 'settings')"><span class="glyphicon glyphicon-cog"></span> Settings</button>
+        <button ng-class="{true: 'btn btn-success', false: 'btn btn-primary'}[data.serverTab === 'settings']" ng-click="openMenu('settings')"><span class="glyphicon glyphicon-cog"></span> Settings</button>
     </li>
 </ul>

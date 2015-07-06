@@ -4,6 +4,8 @@ var cluster = require("cluster"),
     fs = require("fs"),
     path = require("path"),
     os = require("os"),
+    crypto = require("crypto"),
+    Server = require("./server"),
     Launcher = require("descent3launcher"),
     mn3tools = require("descent3mn3tools");
 
@@ -11,87 +13,98 @@ module.exports = function() {
     "use strict";
 
     var d = domain.create(),
-        writingSettings = false,
-        writeSettingsCallback,
-        wss,
+        wss;
 
-        titleCase = function(text) {
-            return text.replace(/\w[\S\-]*/g, function(match) {
-                return match.charAt(0).toUpperCase() + match.substr(1).toLowerCase();
-            });
-        },
+    // Run the WebSocket server in a domain.
+    d.run(function() {
+        var settings = {},
+            writingSettings = false,
+            servers = [],
+            writeSettingsCallback,
 
-        writeSettings = function(settings, callback) {
-            if (writingSettings) {
-                writeSettingsCallback = function() {
-                    writeSettings(settings, callback);
-                };
-                return;
-            }
-            writingSettings = true;
-            fs.writeFile("./settings.json", JSON.stringify(settings), function() {
-                if (typeof writeSettingsCallback === "function") {
-                    writeSettingsCallback();
-                }
-                writingSettings = false;
-                writeSettingsCallback = undefined;
-                if (typeof callback === "function") {
-                    callback();
-                }
-            });
-        },
+            titleCase = function(text) {
+                return text.replace(/\w[\S\-]*/g, function(match) {
+                    return match.charAt(0).toUpperCase() + match.substr(1).toLowerCase();
+                });
+            },
 
-        getConnectionAndGameTypes = function(d3path, callback) {
-            var connectionTypes = [],
-                gameTypes = [];
-            fs.readdir(path.join(d3path, "online"), function(err, connectionFiles) {
-                if (err) {
-                    callback(err);
+            writeSettings = function(settings, callback) {
+                if (writingSettings) {
+                    writeSettingsCallback = function() {
+                        writeSettings(settings, callback);
+                    };
                     return;
                 }
-
-                connectionFiles.forEach(function(filename) {
-                    var match = /^(.*)\.d3c$/.safeexec(filename);
-
-                    if (match) {
-                        connectionTypes.push({
-                            name: match[1],
-                            titleName: titleCase(match[1])
-                        });
+                writingSettings = true;
+                fs.writeFile("./settings.json", JSON.stringify(settings), function() {
+                    if (typeof writeSettingsCallback === "function") {
+                        writeSettingsCallback();
+                    }
+                    writingSettings = false;
+                    writeSettingsCallback = undefined;
+                    if (typeof callback === "function") {
+                        callback();
                     }
                 });
+            },
 
-                fs.readdir(path.join(d3path, "netgames"), function(err, gameTypeFiles) {
+            getConnectionAndGameTypes = function(d3path, callback) {
+                var connectionTypes = [],
+                    gameTypes = [];
+                fs.readdir(path.join(d3path, "online"), function(err, connectionFiles) {
                     if (err) {
                         callback(err);
                         return;
                     }
 
-                    gameTypeFiles.forEach(function(filename) {
-                        var match = /^(.*)\.d3m$/.safeexec(filename);
+                    connectionFiles.forEach(function(filename) {
+                        var match = /^(.*)\.d3c$/.safeexec(filename);
 
                         if (match) {
-                            gameTypes.push({
+                            connectionTypes.push({
                                 name: match[1],
                                 titleName: titleCase(match[1])
                             });
                         }
                     });
 
-                    callback(null, connectionTypes, gameTypes);
-                });
-            });
-        };
+                    fs.readdir(path.join(d3path, "netgames"), function(err, gameTypeFiles) {
+                        if (err) {
+                            callback(err);
+                            return;
+                        }
 
-    // Run the WebSocket server in a domain.
-    d.run(function() {
-        var settings = {};
+                        gameTypeFiles.forEach(function(filename) {
+                            var match = /^(.*)\.d3m$/.safeexec(filename);
+
+                            if (match) {
+                                gameTypes.push({
+                                    name: match[1],
+                                    titleName: titleCase(match[1])
+                                });
+                            }
+                        });
+
+                        callback(null, connectionTypes, gameTypes);
+                    });
+                });
+            },
+
+            randomPassword = function(callback) {
+                crypto.randomBytes(24, function(err, buffer) {
+                    if (err) {
+                        callback(err);
+                        return;
+                    }
+
+                    callback(null, buffer.toString("base64"));
+                });
+            };
 
         wss = new WebSocket.Server({port: 20921});
 
         // Listen for new connections.
         wss.on("connection", function(ws) {
-
             var sendMissions = function(missions) {
                 ws.send(JSON.stringify({
                     message: "missions",
@@ -105,6 +118,14 @@ module.exports = function() {
                         };
                     })
                 }));
+            };
+
+            wss.broadcast = function(message) {
+                message = JSON.stringify(message);
+
+                wss.clients.forEach(function(client) {
+                    client.send(message);
+                });
             };
 
             // Parse any messages.
@@ -222,22 +243,45 @@ module.exports = function() {
                         });
                         break;
                     case "launchserver":
-                        var server = new Launcher();
-                        server.options = message.settings;
-                        server.createServer(function(err) {
+                        randomPassword(function(err, password) {
+                            var launcher;
+
                             if (err) {
                                 ws.send(JSON.stringify({
                                     message: "warning",
-                                    text: "There was an error launching the server.",
+                                    text: "There was a system error while generating the password to launch the server.",
                                     err: err
                                 }));
                                 return;
                             }
 
-                            ws.send(JSON.stringify({
-                                message: "serverlaunched",
-                                port: message.settings.server.port
-                            }));
+                            launcher = new Launcher();
+                            launcher.options = message.settings;
+                            launcher.options.game.allowRemoteConsole = true;
+                            launcher.options.game.consolePassword = password;
+                            launcher.options.game.remoteConsolePort = launcher.options.server.port;
+
+                            launcher.createServer(function(err) {
+                                var server;
+
+                                if (err) {
+                                    ws.send(JSON.stringify({
+                                        message: "warning",
+                                        text: "There was an error launching the server.",
+                                        err: err
+                                    }));
+                                    return;
+                                }
+
+                                ws.send(JSON.stringify({
+                                    message: "serverlaunched",
+                                    port: message.settings.server.port
+                                }));
+
+                                server = new Server(launcher.options, wss);
+
+                                servers.push(server);
+                            });
                         });
                         break;
                     case "missions":
@@ -371,7 +415,7 @@ module.exports = function() {
     });
 
     // Log any errors and restart the worker.
-    d.on("error2", function(err) {
+    d.on("error", function(err) {
         console.log("An error occurred:", err);
 
         if (wss) {

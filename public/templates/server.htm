@@ -1,14 +1,23 @@
-<ul class="nav nav-pills">
-    <li role="presentation">
-        <button class="server-menu-tab btn btn-success"><span class="glyphicon glyphicon-dashboard"></span> Scoreboard</button>
-    </li>
-    <li role="presentation">
-        <button class="server-menu-tab btn btn-primary"><span class="glyphicon glyphicon-list-alt"></span> Log</button>
-    </li>
-    <li role="presentation">
-        <button class="server-menu-tab btn btn-primary"><span class="glyphicon glyphicon-console"></span> Console</button>
-    </li>
-    <li role="presentation">
-        <button class="server-menu-tab btn btn-primary"><span class="glyphicon glyphicon-cog"></span> Settings</button>
-    </li>
-</ul>
+<div ng-if="!data.currentServer.loading">
+    <ul class="nav nav-pills">
+        <li role="presentation">
+            <button ng-class="{true: 'btn btn-success', false: 'btn btn-primary'}[data.serverMenuTab === 'scoreboard']" ng-click="openServerMenu('scoreboard')"><span class="glyphicon glyphicon-dashboard"></span> Scoreboard</button>
+        </li>
+        <li role="presentation">
+            <button ng-class="{true: 'btn btn-success', false: 'btn btn-primary'}[data.serverMenuTab === 'console']" ng-click="openServerMenu('console')"><span class="glyphicon glyphicon-console"></span> Console</button>
+        </li>
+        <li role="presentation">
+            <button ng-class="{true: 'btn btn-success', false: 'btn btn-primary'}[data.serverMenuTab === 'log']" ng-click="openServerMenu('log')"><span class="glyphicon glyphicon-list-alt"></span> Log</button>
+        </li>
+        <li role="presentation">
+            <button ng-class="{true: 'btn btn-success', false: 'btn btn-primary'}[data.serverMenuTab === 'settings']" ng-click="openServerMenu('settings')"><span class="glyphicon glyphicon-cog"></span> Settings</button>
+        </li>
+    </ul><br />
+    <server-scoreboard ng-if="data.serverMenuTab === 'scoreboard'"></server-scoreboard>
+    <server-console ng-if="data.serverMenuTab === 'console'"></server-console>
+    <server-log ng-if="data.serverMenuTab === 'scoreboard'"></server-log>
+    <server-settings ng-if="data.serverMenuTab === 'settings'"></server-settings>
+</div>
+<div ng-if="data.currentServer.loading" class="text-center">
+    <h1>Loading...</h1>
+</div>

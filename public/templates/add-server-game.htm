@@ -71,12 +71,6 @@
         <span class="input-group-addon" style="white-space: nowrap; width: 1px;">Selected mission:</span>
         <span class="input-group-addon" style="width: 100%; padding: 0; text-align: left;">{{data.settings.addServer.game.missionName}} <button class="btn btn-sm btn-info" ng-if="data.settings.addServer.game.selectedMission" ng-click="data.showMissionToggle = !data.showMissionToggle;"><span ng-class="{true: 'glyphicon glyphicon-minus-sign', false: 'glyphicon glyphicon-plus-sign'}[!!data.showMissionToggle]"></span></button></span>
     </div>
-    <div class="input-group" ng-if="data.settings.addServer.game.missionName">
-        <span class="input-group-addon" style="white-space: nowrap; width: 1px;">Starting Level:</span>
-        <span class="input-group-addon" style="width: 100%; padding: 0;">
-            <select class="form-control" ng-model="data.settings.addServer.game.setLevel" ng-options="(data.settings.addServer.game.selectedMission.data.levels.indexOf(level) + 1) as ((data.settings.addServer.game.selectedMission.data.levels.indexOf(level) + 1).toString() + ') ' + (level.name || level.mine)) for level in data.settings.addServer.game.selectedMission.data.levels"></select>
-        </span>
-    </div>
     <div ng-if="data.showMissionToggle">
         <table class="table table-condensed" style="margin-bottom: 0">
             <tr ng-repeat="level in data.settings.addServer.game.selectedMission.data.levels">
@@ -92,6 +86,12 @@
                 </td>
             </tr>
         </table>
+    </div>
+    <div class="input-group" ng-if="data.settings.addServer.game.missionName">
+        <span class="input-group-addon" style="white-space: nowrap; width: 1px;">Starting Level:</span>
+        <span class="input-group-addon" style="width: 100%; padding: 0;">
+            <select class="form-control" ng-model="data.settings.addServer.game.setLevel" ng-options="(data.settings.addServer.game.selectedMission.data.levels.indexOf(level) + 1) as ((data.settings.addServer.game.selectedMission.data.levels.indexOf(level) + 1).toString() + ') ' + (level.name || level.mine)) for level in data.settings.addServer.game.selectedMission.data.levels"></select>
+        </span>
     </div>
     <div ng-if="data.missionsList && data.missionsList.length > 0">
         <div class="panel panel-default" style="margin-bottom: 0;">
