@@ -260,17 +260,41 @@ var app = angular.module("ddsn", []),
 
         $scope.openServer = function(port) {
             getServer(port, function(server) {
+                var serverConsole;
+
                 if (!server) {
                     return;
                 }
 
                 data.serverTab = "server";
                 data.currentServer = server;
+
+                scope.$evalAsync(function() {
+                    setTimeout(function() {
+                        serverConsole = $("#server-console");
+                        if (serverConsole.length > 0) {
+                            serverConsole[0].scrollTop = serverConsole[0].scrollHeight;
+                        }
+                    }, 0);
+                });
             });
         };
 
         $scope.openServerMenu = function(screen) {
+            var serverConsole;
+
             data.serverMenuTab = screen;
+
+            if (screen === "console") {
+                scope.$evalAsync(function() {
+                    setTimeout(function() {
+                        serverConsole = $("#server-console");
+                        if (serverConsole.length > 0) {
+                            serverConsole[0].scrollTop = serverConsole[0].scrollHeight;
+                        }
+                    }, 0);
+                });
+            }
         };
 
         $scope.openAddServer = function(screen) {
@@ -438,6 +462,7 @@ var app = angular.module("ddsn", []),
 
             data.currentServer = server;
             data.serverTab = "server";
+            data.serverMenuTab = "scoreboard";
         };
 
         $scope.updateSettingsDescent3Path = function() {
@@ -494,7 +519,7 @@ var app = angular.module("ddsn", []),
                             if (!server) {
                                 return;
                             }
-console.log(message.port);
+
                             if (data.currentServer.settings.server.port === message.port) {
                                 data.currentServer = null;
                                 if (data.serverTab === "server") {
@@ -523,13 +548,30 @@ console.log(message.port);
                         break;
                     case "server.raw":
                         getServer(message.port, function(server) {
+                            var serverConsole,
+                                scroll;
+
                             if (!server) {
                                 return;
                             }
 
+                            serverConsole = $("#server-console");
+
                             server.console.push(message.data);
 
+                            scroll = serverConsole.length > 0 && serverConsole[0].scrollTop + serverConsole.innerHeight() === serverConsole[0].scrollHeight;
+
                             scope.$apply();
+
+                            scope.$evalAsync(
+                                function() {
+                                    if (scroll) {
+                                        setTimeout(function() {
+                                            serverConsole[0].scrollTop = serverConsole[0].scrollHeight;
+                                        }, 0);
+                                    }
+                                }
+                            );
                         });
                         break;
                     case "settings":

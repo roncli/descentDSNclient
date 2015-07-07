@@ -447,7 +447,7 @@ module.exports = function() {
     });
 
     // Log any errors and restart the worker.
-    d.on("error", function(err) {
+    d.on("error2", function(err) {
         console.log("An error occurred:", err);
 
         if (wss) {

@@ -1,5 +1,5 @@
 <div class="panel panel-default" style="font-family: Consolas, Lucida Console, monospace;">
-    <div class="panel-body" style="max-height: 500px; overflow-y: scroll;">
-        <div ng-repeat="line in data.currentServer.console track by $index">{{line}}</div>
-    </div>
+<div id="server-console" class="panel-body" style="max-height: 500px; overflow-y: scroll;">
+    <div ng-repeat="line in data.currentServer.console | limitTo : -100 track by $index" style="white-space: pre;">{{line}}</div>
+</div>
 </div>

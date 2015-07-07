@@ -65,11 +65,24 @@ Server.prototype.connect = function() {
 Server.prototype.init = function() {
     "use strict";
 
-    var server = this;
+    var server = this,
 
-    this.console.removeAllListeners("error");
+        closeServer = function(reason, err) {
+            server.wss.broadcast({
+                message: "server.close",
+                reason: reason,
+                err: err,
+                port: server.settings.server.port
+            });
 
-    this.wss.broadcast({
+            server.console.removeAllListeners("close");
+            server.console.close();
+            server.emit("close");
+        };
+
+    server.console.removeAllListeners("error");
+
+    server.wss.broadcast({
         message: "server.connected",
         port: server.settings.server.port
     });
@@ -85,52 +98,24 @@ Server.prototype.init = function() {
     });
 
     this.console.on("close", function() {
-        server.wss.broadcast({
-            message: "server.close",
-            reason: "close",
-            port: server.settings.server.port
-        });
-
-        server.console.removeAllListeners("close");
-        server.console.close();
-        server.emit("close");
+        closeServer("close");
     });
 
     this.console.on("end", function() {
-        server.wss.broadcast({
-            message: "server.close",
-            reason: "end",
-            port: server.settings.server.port
-        });
-
-        server.console.removeAllListeners("end");
-        server.console.close();
-        server.emit("close");
+        closeServer("end");
     });
 
     this.console.on("timeout", function() {
-        server.wss.broadcast({
-            message: "server.close",
-            reason: "timeout",
-            port: server.settings.server.port
-        });
-
-        server.console.removeAllListeners("timeout");
-        server.console.close();
-        server.emit("close");
+        closeServer("timeout");
     });
 
     this.console.on("error", function(err) {
-        server.wss.broadcast({
-            message: "server.close",
-            reason: "error",
-            err: err,
-            port: server.settings.server.port
-        });
+        closeServer("error", err);
+    });
 
-        server.console.removeAllListeners("error");
-        server.console.close();
-        server.emit("close");
+    this.console.once("loggedin", function() {
+        server.console.netgameInfo();
+        server.console.players();
     });
 };
 
