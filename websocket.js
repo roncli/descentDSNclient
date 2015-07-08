@@ -255,7 +255,7 @@ module.exports = function() {
                         break;
                     case "launchserver":
                         randomPassword(function(err, password) {
-                            var launcher, data, server;
+                            var launcher, serverData, server;
 
                             if (err) {
                                 ws.send(JSON.stringify({
@@ -272,15 +272,37 @@ module.exports = function() {
                             launcher.options.game.consolePassword = password;
                             launcher.options.game.remoteConsolePort = launcher.options.server.port;
 
-                            data = {
+                            serverData = {
                                 settings: launcher.options,
                                 console: [],
+                                events: [],
+                                players: [],
+                                teams: {},
+                                playerNames: {},
                                 loading: true
                             };
 
-                            servers.data.push(data);
+                            servers.data.push(serverData);
 
                             launcher.createServer(function(err) {
+                                var lastPlayerNum,
+
+                                    getElapsedTime = function() {
+                                        return new Date().getTime() - serverData.startTime;
+                                    },
+
+                                    getPlayerNum = function(player) {
+                                        return serverData.playerNames[player];
+                                    },
+
+                                    addEvent = function(event) {
+                                        event.time = getElapsedTime();
+                                        serverData.events.push(event);
+                                        event.message = "server.event";
+                                        event.port = launcher.options.server.port;
+                                        wss.broadcast(event);
+                                    };
+
                                 if (err) {
                                     ws.send(JSON.stringify({
                                         message: "warning",
@@ -298,11 +320,12 @@ module.exports = function() {
                                 server = new Server(launcher.options, wss);
 
                                 server.on("connected", function() {
-                                    data.loading = false;
+                                    serverData.loading = false;
+                                    serverData.startTime = new Date().getTime();
                                 });
 
                                 server.on("raw", function(line) {
-                                    data.console.push(line);
+                                    serverData.console.push(line);
                                 });
 
                                 server.on("close", function() {
@@ -310,6 +333,317 @@ module.exports = function() {
                                     servers.servers.splice(servers.servers.indexOf(server), 1);
                                     server = null;
                                     data = null;
+                                });
+
+                                server.on("kill", function(killer, killed, weapon) {
+                                    var killerNum = getPlayerNum(killer),
+                                        killedNum = getPlayerNum(killed);
+
+                                    addEvent({
+                                        event: "kill",
+                                        killer: killer,
+                                        killed: killed,
+                                        weapon: weapon
+                                    });
+
+                                    if (killerNum) {
+                                        serverData.players[killerNum].connected = true;
+                                        if (!serverData.players[killerNum].opponents[killed]) {
+                                            serverData.players[killerNum].opponents[killed] = {
+                                                kills: 0,
+                                                deaths: 0
+                                            };
+                                        }
+                                        serverData.players[killerNum].opponents[killed].kills++;
+                                    }
+
+                                    if (killedNum) {
+                                        serverData.players[killedNum].connected = true;
+                                        if (!serverData.players[killedNum].opponents[killer]) {
+                                            serverData.players[killedNum].opponents[killer] = {
+                                                kills: 0,
+                                                deaths: 0
+                                            };
+                                        }
+                                        serverData.players[killedNum].opponents[killer].deaths++;
+                                    }
+                                });
+
+                                server.on("suicide", function(player) {
+                                    var playerNum = getPlayerNum(player);
+
+                                    if (playerNum) {
+                                        serverData.players[playerNum].connected = true;
+                                    }
+
+                                    addEvent({
+                                        event: "suicide",
+                                        player: player
+                                    });
+                                });
+
+                                server.on("death", function(player) {
+                                    var playerNum = getPlayerNum(player);
+
+                                    if (playerNum) {
+                                        serverData.players[playerNum].connected = true;
+                                    }
+
+                                    addEvent({
+                                        event: "death",
+                                        player: player
+                                    });
+                                });
+
+                                server.on("robotdeath", function(player) {
+                                    addEvent({
+                                        event: "robotdeath",
+                                        player: player
+                                    });
+                                });
+
+                                server.on("monsterballpoint", function(player, team) {
+                                    addEvent({
+                                        event: "monsterballpoint",
+                                        player: player,
+                                        team: team
+                                    });
+                                });
+
+                                server.on("monsterballblunder", function(player, team) {
+                                    addEvent({
+                                        event: "monsterballblunder",
+                                        player: player,
+                                        team: team
+                                    });
+                                });
+
+                                server.on("flagscore", function(player, team, flag1, flag2, flag3) {
+                                    var playerNum = getPlayerNum(player);
+
+                                    if (playerNum) {
+                                        serverData.players[playerNum].connected = true;
+                                    }
+
+                                    addEvent({
+                                        event: "flagscore",
+                                        player: player,
+                                        team: team,
+                                        flag1: flag1,
+                                        flag2: flag2,
+                                        flag3: flag3
+                                    });
+                                });
+
+                                server.on("entropybase", function(player, team, base) {
+                                    addEvent({
+                                        event: "entropybase",
+                                        player: player,
+                                        team: team,
+                                        base: base
+                                    });
+                                });
+
+                                server.on("hoardscore", function(player, score) {
+                                    addEvent({
+                                        event: "hoardscore",
+                                        player: player,
+                                        score: score
+                                    });
+                                });
+
+                                server.on("joined", function(player, team) {
+                                    addEvent({
+                                        event: "joined",
+                                        player: player,
+                                        team: team
+                                    });
+                                });
+
+                                server.on("left", function(player) {
+                                    var playerNum = getPlayerNum(player);
+
+                                    if (playerNum) {
+                                        serverData.players[playerNum].connected = false;
+                                    }
+
+                                    addEvent({
+                                        event: "left",
+                                        player: player
+                                    });
+                                });
+
+                                server.on("disconnected", function(player) {
+                                    var playerNum = getPlayerNum(player);
+
+                                    if (playerNum) {
+                                        serverData.players[playerNum].connected = false;
+                                    }
+
+                                    addEvent({
+                                        event: "disconnected",
+                                        player: player
+                                    });
+                                });
+
+                                server.on("observing", function(player) {
+                                    var playerNum = getPlayerNum(player);
+
+                                    if (playerNum) {
+                                        serverData.players[playerNum].connected = true;
+                                        serverData.players[playerNum].observing = true;
+                                    }
+
+                                    addEvent({
+                                        event: "observing",
+                                        player: player
+                                    });
+                                });
+
+                                server.on("unobserving", function(player) {
+                                    var playerNum = getPlayerNum(player);
+
+                                    if (playerNum) {
+                                        serverData.players[playerNum].connected = true;
+                                        serverData.players[playerNum].observing = false;
+                                    }
+
+                                    addEvent({
+                                        event: "unobserving",
+                                        player: player
+                                    });
+                                });
+
+                                server.on("teamchange", function(player, team) {
+                                    var playerNum = getPlayerNum(player);
+
+                                    if (playerNum) {
+                                        serverData.players[playerNum].connected = true;
+                                        serverData.players[playerNum].teamName = team;
+                                    }
+
+                                    addEvent({
+                                        event: "teamchange",
+                                        player: player,
+                                        team: team
+                                    });
+                                });
+
+                                server.on("playerscore", function(player, points, kills, deaths, suicides, ping) {
+                                    var playerNum = getPlayerNum(player);
+
+                                    if (playerNum) {
+                                        serverData.players[playerNum].points = points;
+                                        serverData.players[playerNum].kills = kills;
+                                        serverData.players[playerNum].deaths = deaths;
+                                        serverData.players[playerNum].suicides = suicides;
+                                        serverData.players[playerNum].ping = ping;
+                                    }
+                                });
+
+                                server.on("teamscore", function(teamName, score) {
+                                    serverData[teamName] = score;
+                                });
+
+                                server.on("teamplayerscore", function(player, teamName, points, kills, deaths, suicides, ping) {
+                                    var playerNum = getPlayerNum(player);
+
+                                    if (playerNum) {
+                                        serverData.players[playerNum].teamName = teamName;
+                                        serverData.players[playerNum].points = points;
+                                        serverData.players[playerNum].kills = kills;
+                                        serverData.players[playerNum].deaths = deaths;
+                                        serverData.players[playerNum].suicides = suicides;
+                                        serverData.players[playerNum].ping = ping;
+                                    }
+                                });
+
+                                server.on("playertotalscore", function(player, points, totalPoints, kills, totalKills, deaths, totalDeaths, suicides, totalSuicides, ping) {
+                                    var playerNum = getPlayerNum(player);
+
+                                    if (playerNum) {
+                                        serverData.players[playerNum].points = points;
+                                        serverData.players[playerNum].totalPoints = totalPoints;
+                                        serverData.players[playerNum].kills = kills;
+                                        serverData.players[playerNum].totalKills = totalKills;
+                                        serverData.players[playerNum].deaths = deaths;
+                                        serverData.players[playerNum].totalDeaths = totalDeaths;
+                                        serverData.players[playerNum].suicides = suicides;
+                                        serverData.players[playerNum].totalSuicides = totalSuicides;
+                                        serverData.players[playerNum].ping = ping;
+                                    }
+                                });
+
+                                server.on("monsterballscore", function(player, points, blunders, kills, deaths, suicides, ping) {
+                                    var playerNum = getPlayerNum(player);
+
+                                    if (playerNum) {
+                                        serverData.players[playerNum].points = points;
+                                        serverData.players[playerNum].blunders = blunders;
+                                        serverData.players[playerNum].kills = kills;
+                                        serverData.players[playerNum].deaths = deaths;
+                                        serverData.players[playerNum].suicides = suicides;
+                                        serverData.players[playerNum].ping = ping;
+                                    }
+                                });
+
+                                server.on("player", function(playerNum, name) {
+                                    var oldPlayerNum = getPlayerNum(name);
+
+                                    if (oldPlayerNum === playerNum) {
+                                        serverData.players[playerNum].connected = true;
+
+                                        return;
+                                    }
+
+                                    if (oldPlayerNum) {
+                                        serverData.players[playerNum] = serverData.players[oldPlayerNum];
+                                        serverData.players[oldPlayerNum] = null;
+                                    } else {
+                                        serverData.players[playerNum] = {
+                                            name: name,
+                                            connected: true
+                                        };
+                                    }
+                                    serverData.playerNames[name] = playerNum;
+                                });
+
+                                server.on("playerinfo", function(info) {
+                                    var key;
+
+                                    if (info.player) {
+                                        lastPlayerNum = getPlayerNum(info.player);
+                                    }
+
+                                    for (key in info) {
+                                        if (info.hasOwnProperty(key)) {
+                                            switch (key) {
+                                                case "team":
+                                                    serverData.players[lastPlayerNum].teamName = info[key];
+                                                    break;
+                                                case "totalTimeInGame":
+                                                    serverData.players[lastPlayerNum].startTime = new Date().getTime() - (info[key] * 1000);
+                                                    break;
+                                                default:
+                                                    serverData.players[lastPlayerNum][key] = info[key];
+                                                    break;
+                                            }
+                                        }
+                                    }
+                                });
+
+                                server.on("endlevel", function() {
+                                    addEvent({
+                                        event: "endlevel"
+                                    });
+                                });
+
+                                server.on("startlevel", function() {
+                                    // TODO: Save previous game to file.
+                                    serverData.startTime = new Date().getTime();
+                                    addEvent({
+                                        event: "startlevel"
+                                    });
                                 });
 
                                 servers.servers.push(server);

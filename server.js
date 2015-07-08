@@ -80,9 +80,9 @@ Server.prototype.init = function() {
             server.emit("close");
         };
 
-    server.console.removeAllListeners("error");
+    this.console.removeAllListeners("error");
 
-    server.wss.broadcast({
+    this.wss.broadcast({
         message: "server.connected",
         port: server.settings.server.port
     });
@@ -117,6 +117,179 @@ Server.prototype.init = function() {
         server.console.netgameInfo();
         server.console.players();
     });
+
+    if (["anarchy", "co-op", "ctf", "entropy", "hoard", "hyper-anarchy", "monsterball", "robo-anarchy", "team anarchy"].indexOf(this.settings.game.scriptName.toLowerCase()) !== -1) {
+        this.console.on("kill", function(killer, killed, weapon) {
+            server.console.scores();
+            server.emit("kill", killer, killed, weapon);
+        });
+
+        this.console.on("suicide", function(player) {
+            server.console.scores();
+            server.emit("suicide", player);
+        });
+
+        this.console.on("death", function(player) {
+            server.console.scores();
+            server.emit("death", player);
+        });
+
+        this.console.on("robotdeath", function(player) {
+            server.console.scores();
+            server.emit("robotdeath", player);
+        });
+
+        this.console.on("monsterballpoint", function(player, team) {
+            server.console.scores();
+            server.emit("monsterballpoint", player, team);
+        });
+
+        this.console.on("monsterballblunder", function(player, team) {
+            server.console.scores();
+            server.emit("monsterballblunder", player, team);
+        });
+
+        this.console.on("flagscore", function(player, team, flag1, flag2, flag3) {
+            server.console.scores();
+            server.emit("flagscore", player, team, flag1, flag2, flag3);
+        });
+
+        this.console.on("entropybase", function(player, team, room) {
+            server.console.scores();
+            server.emit("entropybase", player, team, room);
+        });
+
+        this.console.on("hoardscore", function(player, score) {
+            server.console.scores();
+            server.emit("hoardscore", player, score);
+        });
+
+        this.console.on("joined", function(player, team) {
+            server.console.players();
+            server.emit("joined", player, team);
+        });
+
+        this.console.on("left", function(player) {
+            server.emit("left", player);
+        });
+
+        this.console.on("disconnected", function(player) {
+            server.emit("disconnected", player);
+        });
+
+        this.console.on("observing", function(player) {
+            server.emit("observing", player);
+        });
+
+        this.console.on("unobserving", function(player) {
+            server.emit("unobserving", player);
+        });
+
+        this.console.on("teamchange", function(player, team) {
+            server.emit("teamchange", player, team);
+        });
+
+        this.console.on("playerscore", function(player, points, kills, deaths, suicides, ping) {
+            server.emit("playerscore", player, points, kills, deaths, suicides, ping);
+            server.wss.broadcast({
+                message: "server.playerscore",
+                port: server.console.port,
+                player: player,
+                points: points,
+                kills: kills,
+                deaths: deaths,
+                suicides: suicides,
+                ping: ping
+            });
+        });
+
+        this.console.on("teamscore", function(teamName, score) {
+            server.emit("teamscore", teamName, score);
+            server.wss.broadcast({
+                message: "server.teamscore",
+                port: server.console.port,
+                teamName: teamName,
+                score: score
+            });
+        });
+
+        this.console.on("teamplayerscore", function(player, teamName, points, kills, deaths, suicides, ping) {
+            server.emit("teamplayerscore", player, teamName, points, kills, deaths, suicides, ping);
+            server.wss.broadcast({
+                message: "server.teamplayerscore",
+                port: server.console.port,
+                player: player,
+                teamName: teamName,
+                points: points,
+                kills: kills,
+                deaths: deaths,
+                suicides: suicides,
+                ping: ping
+            });
+        });
+
+        this.console.on("playertotalscore", function(player, points, totalPoints, kills, totalKills, deaths, totalDeaths, suicides, totalSuicides, ping) {
+            server.emit("playertotalscore", player, points, totalPoints, kills, totalKills, deaths, totalDeaths, suicides, totalSuicides, ping);
+            server.wss.broadcast({
+                message: "server.playertotalscore",
+                port: server.console.port,
+                player: player,
+                points: points,
+                totalPoints: totalPoints,
+                kills: kills,
+                totalKills: totalKills,
+                deaths: deaths,
+                totalDeaths: totalDeaths,
+                suicides: suicides,
+                totalSuicides: totalSuicides,
+                ping: ping
+            });
+        });
+
+        this.console.on("monsterballscore", function(player, points, blunders, kills, deaths, suicides, ping) {
+            server.emit("monsterballscore", player, points, blunders, kills, deaths, suicides, ping);
+            server.wss.broadcast({
+                message: "server.monsterballscore",
+                port: server.console.port,
+                player: player,
+                points: points,
+                blunders: blunders,
+                kills: kills,
+                deaths: deaths,
+                suicides: suicides,
+                ping: ping
+            });
+        });
+
+        this.console.on("player", function(playerNum, name) {
+            server.console.playerInfo(playerNum);
+            server.emit("player", playerNum, name);
+            server.wss.broadcast({
+                message: "server.player",
+                port: server.console.port,
+                playerNum: playerNum,
+                name: name
+            });
+        });
+
+        this.console.on("playerinfo", function(info) {
+            server.emit("playerinfo", info);
+            server.wss.broadcast({
+                message: "server.playerinfo",
+                port: server.console.port,
+                info: info
+            });
+        });
+
+        this.console.on("endlevel", function() {
+            server.emit("endlevel");
+        });
+
+        this.console.on("startlevel", function() {
+            server.console.netgameInfo();
+            server.emit("startlevel");
+        });
+    }
 };
 
 module.exports = Server;
