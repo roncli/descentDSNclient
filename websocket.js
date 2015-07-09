@@ -279,7 +279,8 @@ module.exports = function() {
                                 players: [],
                                 teams: {},
                                 playerNames: {},
-                                loading: true
+                                loading: true,
+                                logs: []
                             };
 
                             servers.data.push(serverData);
@@ -298,9 +299,12 @@ module.exports = function() {
                                     addEvent = function(event) {
                                         event.time = getElapsedTime();
                                         serverData.events.push(event);
-                                        event.message = "server.event";
-                                        event.port = launcher.options.server.port;
-                                        wss.broadcast(event);
+
+                                        wss.broadcast({
+                                            message: "server.event",
+                                            event: event,
+                                            port: launcher.options.server.port
+                                        });
                                     };
 
                                 if (err) {
@@ -465,11 +469,13 @@ module.exports = function() {
 
                                     if (playerNum) {
                                         serverData.players[playerNum].connected = false;
+                                        serverData.players[playerNum].timeInGame = Math.ceil((new Date().getTime() - serverData.startTime) / 1000);
                                     }
 
                                     addEvent({
                                         event: "left",
-                                        player: player
+                                        player: player,
+                                        connected: serverData.players[playerNum].timeInGame
                                     });
                                 });
 
@@ -478,11 +484,13 @@ module.exports = function() {
 
                                     if (playerNum) {
                                         serverData.players[playerNum].connected = false;
+                                        serverData.players[playerNum].timeInGame = Math.ceil((new Date().getTime() - serverData.startTime) / 1000);
                                     }
 
                                     addEvent({
                                         event: "disconnected",
-                                        player: player
+                                        player: player,
+                                        connected: serverData.players[playerNum].timeInGame
                                     });
                                 });
 
@@ -542,7 +550,7 @@ module.exports = function() {
                                 });
 
                                 server.on("teamscore", function(teamName, score) {
-                                    serverData[teamName] = score;
+                                    serverData.teams[teamName] = score;
                                 });
 
                                 server.on("teamplayerscore", function(player, teamName, points, kills, deaths, suicides, ping) {
@@ -602,7 +610,8 @@ module.exports = function() {
                                     } else {
                                         serverData.players[playerNum] = {
                                             name: name,
-                                            connected: true
+                                            connected: true,
+                                            opponents: {}
                                         };
                                     }
                                     serverData.playerNames[name] = playerNum;
@@ -633,16 +642,43 @@ module.exports = function() {
                                 });
 
                                 server.on("endlevel", function() {
+                                    var playerTimes = [];
+
+                                    serverData.players.forEach(function(player) {
+                                        player.timeInGame = Math.ceil((new Date().getTime() - serverData.startTime) / 1000);
+                                        if (player.playerNum || player.playerNum === 0) {
+                                            playerTimes[player.playerNum] = player.timeInGame;
+                                        }
+                                    });
+
                                     addEvent({
-                                        event: "endlevel"
+                                        event: "endlevel",
+                                        times: playerTimes
                                     });
                                 });
 
                                 server.on("startlevel", function() {
-                                    // TODO: Save previous game to file.
-                                    serverData.startTime = new Date().getTime();
+                                    var date = new Date(),
+                                        filename = "./log." + serverData.settings.server.port.toString() + "." + date.getFullYear().toString() + "." + (date.getMonth() < 9 ? "0" : "") + (date.getMonth() + 1).toString() + "." + (date.getDate() < 10 ? "0" : "") + date.getDate().toString() + "." + (date.getHours() < 10 ? "0" : "") + date.getHours().toString() + "." + (date.getMinutes() < 10 ? "0" : "") + date.getMinutes().toString() + "." + (date.getSeconds() < 10 ? "0" : "") + date.getSeconds().toString() + ".json";
+
+                                    fs.writeFile(filename, JSON.stringify(serverData));
+
+                                    serverData.startTime = date.getTime();
+                                    serverData.console = [];
+                                    serverData.events = [];
+                                    serverData.players = [];
+                                    serverData.teams = {};
+                                    serverData.playerNames = {};
+                                    serverData.logs.push({
+                                        date: date,
+                                        filename: filename
+                                    });
                                     addEvent({
-                                        event: "startlevel"
+                                        event: "startlevel",
+                                        log: {
+                                            date: date,
+                                            filename: filename
+                                        }
                                     });
                                 });
 

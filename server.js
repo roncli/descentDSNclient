@@ -49,7 +49,7 @@ Server.prototype.connect = function() {
             server.wss.broadcast({
                 message: "server.close",
                 reason: "failed",
-                port: server.console.port
+                port: server.settings.server.port
             });
             return;
         }
@@ -193,7 +193,7 @@ Server.prototype.init = function() {
             server.emit("playerscore", player, points, kills, deaths, suicides, ping);
             server.wss.broadcast({
                 message: "server.playerscore",
-                port: server.console.port,
+                port: server.settings.server.port,
                 player: player,
                 points: points,
                 kills: kills,
@@ -207,7 +207,7 @@ Server.prototype.init = function() {
             server.emit("teamscore", teamName, score);
             server.wss.broadcast({
                 message: "server.teamscore",
-                port: server.console.port,
+                port: server.settings.server.port,
                 teamName: teamName,
                 score: score
             });
@@ -217,7 +217,7 @@ Server.prototype.init = function() {
             server.emit("teamplayerscore", player, teamName, points, kills, deaths, suicides, ping);
             server.wss.broadcast({
                 message: "server.teamplayerscore",
-                port: server.console.port,
+                port: server.settings.server.port,
                 player: player,
                 teamName: teamName,
                 points: points,
@@ -232,7 +232,7 @@ Server.prototype.init = function() {
             server.emit("playertotalscore", player, points, totalPoints, kills, totalKills, deaths, totalDeaths, suicides, totalSuicides, ping);
             server.wss.broadcast({
                 message: "server.playertotalscore",
-                port: server.console.port,
+                port: server.settings.server.port,
                 player: player,
                 points: points,
                 totalPoints: totalPoints,
@@ -250,7 +250,7 @@ Server.prototype.init = function() {
             server.emit("monsterballscore", player, points, blunders, kills, deaths, suicides, ping);
             server.wss.broadcast({
                 message: "server.monsterballscore",
-                port: server.console.port,
+                port: server.settings.server.port,
                 player: player,
                 points: points,
                 blunders: blunders,
@@ -266,7 +266,7 @@ Server.prototype.init = function() {
             server.emit("player", playerNum, name);
             server.wss.broadcast({
                 message: "server.player",
-                port: server.console.port,
+                port: server.settings.server.port,
                 playerNum: playerNum,
                 name: name
             });
@@ -276,7 +276,7 @@ Server.prototype.init = function() {
             server.emit("playerinfo", info);
             server.wss.broadcast({
                 message: "server.playerinfo",
-                port: server.console.port,
+                port: server.settings.server.port,
                 info: info
             });
         });
