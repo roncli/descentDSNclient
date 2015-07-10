@@ -240,6 +240,27 @@ var app = angular.module("ddsn", []),
             }
         };
 
+        $scope.getTimestamp = function(time) {
+            var seconds = time / 1000,
+                minutes, hours;
+
+            if (seconds <= 59.999) {
+                return seconds.toFixed(2);
+            }
+
+            minutes = Math.floor(seconds / 60);
+            seconds = seconds % 60;
+
+            if (minutes < 60) {
+                return minutes.toString() + ":" + (seconds <= 9.999 ? "0" : "") + seconds.toFixed(2);
+            }
+
+            hours = Math.floor(minutes / 60);
+            minutes = minutes % 60;
+
+            return hours.toString() + ":" + (minutes < 10 ? "0" : "") + minutes.toString() + ":" + (seconds <= 9.999 ? "0" : "") + seconds.toFixed(2);
+        };
+
         $scope.addServerServerRemoveTracker = function(index) {
             data.settings.addServer.server.trackers.splice(index, 1);
         };

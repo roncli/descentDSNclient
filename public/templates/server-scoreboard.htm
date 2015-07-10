@@ -2,6 +2,9 @@
     <div ng-switch-when="anarchy">
         <table class="table table-condensed">
             <tr ng-class="'player' + player.playerNum.toString()" ng-repeat="player in data.currentServer.players | filter: {role: 'client', connected: true} | orderBy: '-points'">
+                <td style="vertical-align: middle;">
+                    <div style="width: 32px; height: 32px; background-image: url('/images/{{player.ship}}.png'); background-size: 32px 32px;"></div>
+                </td>
                 <td class="h3" style="vertical-align: middle;">
                     {{player.name}}
                 </td>
@@ -19,10 +22,11 @@
                 </td>
             </tr>
             <tr class="muted" ng-repeat="player in data.currentServer.players | filter: {role: 'client', connected: false} | orderBy: '-points'">
+                <td></td>
                 <td>
                     {{player.name}}
                 </td>
-                <td>
+                <td CLASS="text-right">
                     {{player.points}}
                 </td>
                 <td class="text-center">
@@ -38,4 +42,47 @@
     <div ng-switch-default>
         There is no scoreboard available for this game mode.
     </div>
+</div>
+<div class="panel-body" style="max-height: 500px; overflow-y: scroll;">
+    <table class="table table-condensed">
+        <tr ng-repeat="event in data.currentServer.events | orderBy: '-time'">
+            <td class="text-right">
+                {{getTimestamp(event.time)}}
+            </td>
+            <td>
+                <div ng-switch="event.event">
+                    <div ng-switch-when="death">
+                        <span ng-class="'player' + data.currentServer.playerNames[event.player]">{{event.player}}</span> <span class="glyphicon glyphicon-fire text-warning"></span>
+                    </div>
+                    <div ng-switch-when="disconnected">
+                        <span class="glyphicon glyphicon-flash text-warning"></span> <span ng-class="'player' + data.currentServer.playerNames[event.player]">{{event.player}}</span>
+                    </div>
+                    <div ng-switch-when="left">
+                        <span class="glyphicon glyphicon-remove text-danger"></span> <span ng-class="'player' + data.currentServer.playerNames[event.player]">{{event.player}}</span>
+                    </div>
+                    <div ng-switch-when="joined">
+                        <span class="glyphicon glyphicon-plus text-success"></span> <span ng-class="'player' + data.currentServer.playerNames[event.player]">{{event.player}}</span>
+                    </div>
+                    <div ng-switch-when="kill">
+                        <span ng-class="'player' + data.currentServer.playerNames[event.killer]">{{event.killer}}</span> <span class="glyphicon glyphicon-screenshot"></span> <span ng-class="'player' + data.currentServer.playerNames[event.killed]">{{event.killed}}</span> <span ng-if="event.weapon"><img style="max-height: 20px; max-width: 32px;" src="/images/{{(event.weapon === 'flare' && data.currentServer.players[data.currentServer.playerNames[event.killer]].ship === 'Black Pyro' ? 'green' : '') + event.weapon}}.png" /></span>
+                    </div>
+                    <div ng-switch-when="observing">
+                        <span class="glyphicon glyphicon-eye-open text-info"></span> <span ng-class="'player' + data.currentServer.playerNames[event.player]">{{event.player}}</span>
+                    </div>
+                    <div ng-switch-when="robotdeath">
+                        Robot <span class="glyphicon glyphicon-screenshot"></span> <span ng-class="'player' + data.currentServer.playerNames[event.player]">{{event.player}}</span>
+                    </div>
+                    <div ng-switch-when="suicide">
+                        <span ng-class="'player' + data.currentServer.playerNames[event.player]">{{event.player}}</span> <span class="glyphicon glyphicon-fire text-danger"></span>
+                    </div>
+                    <div ng-switch-when="unobserving">
+                        <span class="glyphicon glyphicon-eye-close text-info"></span> <span ng-class="'player' + data.currentServer.playerNames[event.player]">{{event.player}}</span>
+                    </div>
+                    <div ng-switch-default>
+                        {{event.event}}
+                    </div>
+                </div>
+            </td>
+        </tr>
+    </table>
 </div>
