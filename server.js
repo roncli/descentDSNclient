@@ -228,24 +228,6 @@ Server.prototype.init = function() {
             });
         });
 
-        this.console.on("playertotalscore", function(player, points, totalPoints, kills, totalKills, deaths, totalDeaths, suicides, totalSuicides, ping) {
-            server.emit("playertotalscore", player, points, totalPoints, kills, totalKills, deaths, totalDeaths, suicides, totalSuicides, ping);
-            server.wss.broadcast({
-                message: "server.playertotalscore",
-                port: server.settings.server.port,
-                player: player,
-                points: points,
-                totalPoints: totalPoints,
-                kills: kills,
-                totalKills: totalKills,
-                deaths: deaths,
-                totalDeaths: totalDeaths,
-                suicides: suicides,
-                totalSuicides: totalSuicides,
-                ping: ping
-            });
-        });
-
         this.console.on("monsterballscore", function(player, points, blunders, kills, deaths, suicides, ping) {
             server.emit("monsterballscore", player, points, blunders, kills, deaths, suicides, ping);
             server.wss.broadcast({

@@ -359,6 +359,7 @@ module.exports = function() {
                                             };
                                         }
                                         serverData.players[killerNum].opponents[killed].kills++;
+                                        serverData.players[killerNum].kills++;
                                     }
 
                                     if (killedNum) {
@@ -370,6 +371,7 @@ module.exports = function() {
                                             };
                                         }
                                         serverData.players[killedNum].opponents[killer].deaths++;
+                                        serverData.players[killedNum].deaths++;
                                     }
                                 });
 
@@ -378,6 +380,7 @@ module.exports = function() {
 
                                     if (playerNum) {
                                         serverData.players[playerNum].connected = true;
+                                        serverData.players[playerNum].suicides++;
                                     }
 
                                     addEvent({
@@ -391,6 +394,7 @@ module.exports = function() {
 
                                     if (playerNum) {
                                         serverData.players[playerNum].connected = true;
+                                        serverData.players[playerNum].deaths++;
                                     }
 
                                     addEvent({
@@ -400,6 +404,12 @@ module.exports = function() {
                                 });
 
                                 server.on("robotdeath", function(player) {
+                                    var playerNum = getPlayerNum(player);
+
+                                    if (playerNum) {
+                                        serverData.players[playerNum].deaths++;
+                                    }
+
                                     addEvent({
                                         event: "robotdeath",
                                         player: player
@@ -415,6 +425,12 @@ module.exports = function() {
                                 });
 
                                 server.on("monsterballblunder", function(player, team) {
+                                    var playerNum = getPlayerNum(player);
+
+                                    if (playerNum) {
+                                        serverData.players[playerNum].blunders++;
+                                    }
+
                                     addEvent({
                                         event: "monsterballblunder",
                                         player: player,
@@ -542,9 +558,6 @@ module.exports = function() {
 
                                     if (playerNum) {
                                         serverData.players[playerNum].points = points;
-                                        serverData.players[playerNum].kills = kills;
-                                        serverData.players[playerNum].deaths = deaths;
-                                        serverData.players[playerNum].suicides = suicides;
                                         serverData.players[playerNum].ping = ping;
                                     }
                                 });
@@ -559,25 +572,6 @@ module.exports = function() {
                                     if (playerNum) {
                                         serverData.players[playerNum].teamName = teamName;
                                         serverData.players[playerNum].points = points;
-                                        serverData.players[playerNum].kills = kills;
-                                        serverData.players[playerNum].deaths = deaths;
-                                        serverData.players[playerNum].suicides = suicides;
-                                        serverData.players[playerNum].ping = ping;
-                                    }
-                                });
-
-                                server.on("playertotalscore", function(player, points, totalPoints, kills, totalKills, deaths, totalDeaths, suicides, totalSuicides, ping) {
-                                    var playerNum = getPlayerNum(player);
-
-                                    if (playerNum) {
-                                        serverData.players[playerNum].points = points;
-                                        serverData.players[playerNum].totalPoints = totalPoints;
-                                        serverData.players[playerNum].kills = kills;
-                                        serverData.players[playerNum].totalKills = totalKills;
-                                        serverData.players[playerNum].deaths = deaths;
-                                        serverData.players[playerNum].totalDeaths = totalDeaths;
-                                        serverData.players[playerNum].suicides = suicides;
-                                        serverData.players[playerNum].totalSuicides = totalSuicides;
                                         serverData.players[playerNum].ping = ping;
                                     }
                                 });
@@ -587,10 +581,6 @@ module.exports = function() {
 
                                     if (playerNum) {
                                         serverData.players[playerNum].points = points;
-                                        serverData.players[playerNum].blunders = blunders;
-                                        serverData.players[playerNum].kills = kills;
-                                        serverData.players[playerNum].deaths = deaths;
-                                        serverData.players[playerNum].suicides = suicides;
                                         serverData.players[playerNum].ping = ping;
                                     }
                                 });
@@ -611,7 +601,12 @@ module.exports = function() {
                                         serverData.players[playerNum] = {
                                             name: name,
                                             connected: true,
-                                            opponents: {}
+                                            opponents: {},
+                                            kills: 0,
+                                            deaths: 0,
+                                            suicides: 0,
+                                            points: 0,
+                                            blunders: 0
                                         };
                                     }
                                     serverData.playerNames[name] = playerNum;

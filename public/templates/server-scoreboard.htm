@@ -1,0 +1,41 @@
+<div ng-switch="data.currentServer.settings.game.scriptName.toLowerCase()">
+    <div ng-switch-when="anarchy">
+        <table class="table table-condensed">
+            <tr ng-class="'player' + player.playerNum.toString()" ng-repeat="player in data.currentServer.players | filter: {role: 'client', connected: true} | orderBy: '-points'">
+                <td class="h3" style="vertical-align: middle;">
+                    {{player.name}}
+                </td>
+                <td class="h3 text-right" style="vertical-align: middle;">
+                    {{player.points}}
+                </td>
+                <td class="text-center" style="vertical-align: middle;">
+                    {{player.kills}} / {{player.deaths}} / {{player.suicides}}
+                </td>
+                <td class="text-right" style="vertical-align: middle;">
+                    {{player.kills + player.deaths + player.suicides === 0 ? "0.00" : (player.kills * 100 / (player.kills + player.deaths + player.suicides)).toFixed(2)}}
+                </td>
+                <td class="text-right" style="vertical-align: middle;">
+                    {{player.ping ? player.ping.toString() + " ms" : ""}}
+                </td>
+            </tr>
+            <tr class="muted" ng-repeat="player in data.currentServer.players | filter: {role: 'client', connected: false} | orderBy: '-points'">
+                <td>
+                    {{player.name}}
+                </td>
+                <td>
+                    {{player.points}}
+                </td>
+                <td class="text-center">
+                    {{player.kills}} / {{player.deaths}} / {{player.suicides}}
+                </td>
+                <td class="text-right">
+                    {{player.kills + player.deaths + player.suicides === 0 ? "0.00" : (player.kills * 100 / (player.kills + player.deaths + player.suicides)).toFixed(2)}}
+                </td>
+                <td></td>
+            </tr>
+        </table>
+    </div>
+    <div ng-switch-default>
+        There is no scoreboard available for this game mode.
+    </div>
+</div>

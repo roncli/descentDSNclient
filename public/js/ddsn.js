@@ -580,6 +580,7 @@ var app = angular.module("ddsn", []),
                                             };
                                         }
                                         server.players[killerNum].opponents[message.event.killed].kills++;
+                                        server.players[killerNum].kills++;
                                     }
 
                                     if (killedNum) {
@@ -591,11 +592,44 @@ var app = angular.module("ddsn", []),
                                             };
                                         }
                                         server.players[killedNum].opponents[message.event.killer].deaths++;
+                                        server.players[killedNum].deaths++;
                                     }
 
                                     break;
                                 case "suicide":
+                                    playerNum = getPlayerNum(server, message.event.player);
+
+                                    if (playerNum) {
+                                        server.players[playerNum].connected = true;
+                                        server.players[playerNum].suicides++;
+                                    }
+
+                                    break;
                                 case "death":
+                                    playerNum = getPlayerNum(server, message.event.player);
+
+                                    if (playerNum) {
+                                        server.players[playerNum].connected = true;
+                                        server.players[playerNum].deaths++;
+                                    }
+
+                                    break;
+                                case "robotdeath":
+                                    playerNum = getPlayerNum(server, message.event.player);
+
+                                    if (playerNum) {
+                                        server.players[playerNum].deaths++;
+                                    }
+
+                                    break;
+                                case "monsterballblunder":
+                                    playerNum = getPlayerNum(server, message.event.player);
+
+                                    if (playerNum) {
+                                        server.players[playerNum].blunders++;
+                                    }
+
+                                    break;
                                 case "flagscore":
                                     playerNum = getPlayerNum(server, message.event.player);
 
@@ -671,10 +705,6 @@ var app = angular.module("ddsn", []),
 
                             if (playerNum) {
                                 server.players[playerNum].points = message.points;
-                                server.players[playerNum].blunders = message.blunders;
-                                server.players[playerNum].kills = message.kills;
-                                server.players[playerNum].deaths = message.deaths;
-                                server.players[playerNum].suicides = message.suicides;
                                 server.players[playerNum].ping = message.ping;
                             }
 
@@ -702,7 +732,12 @@ var app = angular.module("ddsn", []),
                                 server.players[message.playerNum] = {
                                     name: message.name,
                                     connected: true,
-                                    opponents: {}
+                                    opponents: {},
+                                    kills: 0,
+                                    deaths: 0,
+                                    suicides: 0,
+                                    points: 0,
+                                    blunders: 0
                                 };
                             }
                             server.playerNames[message.name] = message.playerNum;
@@ -751,33 +786,7 @@ var app = angular.module("ddsn", []),
 
                             if (playerNum) {
                                 server.players[playerNum].points = message.points;
-                                server.players[playerNum].kills = message.kills;
-                                server.players[playerNum].deaths = message.deaths;
-                                server.players[playerNum].suicides = message.suicides;
                                 server.players[playerNum].ping = message.ping;
-                            }
-
-                            scope.$apply();
-                        });
-                        break;
-                    case "server.playertotalscore":
-                        getServer(message.port, function(server) {
-                            if (!server) {
-                                return;
-                            }
-
-                            var playerNum = getPlayerNum(server, message.player);
-
-                            if (playerNum) {
-                                server.players[playerNum].points = server.points;
-                                server.players[playerNum].totalPoints = server.totalPoints;
-                                server.players[playerNum].kills = server.kills;
-                                server.players[playerNum].totalKills = server.totalKills;
-                                server.players[playerNum].deaths = server.deaths;
-                                server.players[playerNum].totalDeaths = server.totalDeaths;
-                                server.players[playerNum].suicides = server.suicides;
-                                server.players[playerNum].totalSuicides = server.totalSuicides;
-                                server.players[playerNum].ping = server.ping;
                             }
 
                             scope.$apply();
@@ -822,9 +831,6 @@ var app = angular.module("ddsn", []),
                             if (playerNum) {
                                 server.players[playerNum].teamName = message.teamName;
                                 server.players[playerNum].points = message.points;
-                                server.players[playerNum].kills = message.kills;
-                                server.players[playerNum].deaths = message.deaths;
-                                server.players[playerNum].suicides = message.suicides;
                                 server.players[playerNum].ping = message.ping;
                             }
 
