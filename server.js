@@ -118,6 +118,10 @@ Server.prototype.init = function() {
         server.console.players();
     });
 
+    this.console.on("gameinfo", function(info) {
+        server.emit("gameinfo", info);
+    });
+
     if (["anarchy", "co-op", "ctf", "entropy", "hoard", "hyper-anarchy", "monsterball", "robo-anarchy", "team anarchy"].indexOf(this.settings.game.scriptName.toLowerCase()) !== -1) {
         this.console.on("kill", function(killer, killed, weapon) {
             server.console.scores();
@@ -149,6 +153,14 @@ Server.prototype.init = function() {
             server.emit("monsterballblunder", player, team);
         });
 
+        this.console.on("flagpickup", function(player, team, flag) {
+            server.emit("flagpickup", player, team, flag);
+        });
+
+        this.console.on("flagreturn", function(player, team) {
+            server.emit("flagreturn", player, team);
+        });
+
         this.console.on("flagscore", function(player, team, flag1, flag2, flag3) {
             server.console.scores();
             server.emit("flagscore", player, team, flag1, flag2, flag3);
@@ -162,6 +174,18 @@ Server.prototype.init = function() {
         this.console.on("hoardscore", function(player, score) {
             server.console.scores();
             server.emit("hoardscore", player, score);
+        });
+
+        this.console.on("hyperorb", function(player) {
+            server.emit("hyperorb", player);
+        });
+
+        this.console.on("hyperorblost", function(player) {
+            server.emit("hyperorblost", player);
+        });
+
+        this.console.on("hyperorbscore", function(player, points) {
+            server.emit("hyperorbscore", player, points);
         });
 
         this.console.on("joined", function(player, team) {

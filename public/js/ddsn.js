@@ -57,6 +57,54 @@ var app = angular.module("ddsn", []),
         };
     });
 
+    app.directive("chrono", ["$interval", function($interval) {
+        return {
+            restrict: "E",
+            scope: {
+                direction: "@",
+                time: "@"
+            },
+            link: function(scope, element) {
+                var seconds, minutes, hours, timer,
+
+                    tick = function() {
+                        if (scope.direction === "down") {
+                            seconds = Math.floor((scope.time - new Date().getTime()) / 1000);
+                        } else {
+                            seconds = Math.floor((new Date().getTime() - scope.time) / 1000);
+                        }
+
+                        if (seconds < 0) {
+                            seconds = 0;
+                        }
+
+                        minutes = Math.floor(seconds / 60);
+                        seconds = seconds % 60;
+
+                        if (minutes < 60) {
+                            scope.display = minutes.toString() + ":" + (seconds < 10 ? "0" : "") + seconds;
+                            return;
+                        }
+
+                        hours = Math.floor(minutes / 60);
+                        minutes = minutes % 60;
+
+                        scope.display = hours.toString() + ":" + (minutes < 10 ? "0" : "") + minutes.toString() + ":" + (seconds < 10 ? "0" : "") + seconds;
+                    };
+
+                timer = $interval(tick, 1000);
+
+                tick();
+
+                element.on("$destroy", function() {
+                    $interval.cancel(timer);
+                    timer = null;
+                });
+            },
+            template: "{{display}}"
+        };
+    }]);
+
     app.directive("offline", function() {
         return {
             restrict: "E",
@@ -206,6 +254,8 @@ var app = angular.module("ddsn", []),
 
     app.controller("ddsn", ["$scope", function($scope) {
         $scope.data = data;
+
+        $scope.Math = Math;
 
         $scope.getRegionName = function(regionId) {
             switch (regionId) {
@@ -386,7 +436,7 @@ var app = angular.module("ddsn", []),
         };
 
         $scope.missionSearch = function() {
-            if (data.settings.addServer.game.missionSearch.length < 2) {
+            if (!data.settings.addServer.game.missionSearch || data.settings.addServer.game.missionSearch.length < 2) {
                 return;
             }
 
@@ -585,8 +635,6 @@ var app = angular.module("ddsn", []),
                                 return;
                             }
 
-                            server.events.push(message.event);
-
                             switch (message.event.event) {
                                 case "kill":
                                     killerNum = getPlayerNum(server, message.event.killer);
@@ -614,6 +662,7 @@ var app = angular.module("ddsn", []),
                                         }
                                         server.players[killedNum].opponents[message.event.killer].deaths++;
                                         server.players[killedNum].deaths++;
+                                        server.players[killedNum].flags = [];
                                     }
 
                                     break;
@@ -623,6 +672,7 @@ var app = angular.module("ddsn", []),
                                     if (playerNum) {
                                         server.players[playerNum].connected = true;
                                         server.players[playerNum].suicides++;
+                                        server.players[playerNum].flags = [];
                                     }
 
                                     break;
@@ -632,6 +682,7 @@ var app = angular.module("ddsn", []),
                                     if (playerNum) {
                                         server.players[playerNum].connected = true;
                                         server.players[playerNum].deaths++;
+                                        server.players[playerNum].flags = [];
                                     }
 
                                     break;
@@ -651,11 +702,36 @@ var app = angular.module("ddsn", []),
                                     }
 
                                     break;
+                                case "flagpickup":
+                                    playerNum = getPlayerNum(server, message.event.player);
+
+                                    if (playerNum) {
+                                        server.players[playerNum].flags.push(message.event.flag);
+                                    }
+
+                                    break;
                                 case "flagscore":
                                     playerNum = getPlayerNum(server, message.event.player);
 
                                     if (playerNum) {
                                         server.players[playerNum].connected = true;
+                                        server.players[playerNum].flags = [];
+                                    }
+
+                                    break;
+                                case "hyperorb":
+                                    playerNum = getPlayerNum(server, message.event.player);
+
+                                    if (playerNum) {
+                                        server.players[playerNum].hyperorb = true;
+                                    }
+
+                                    break;
+                                case "hyperorblost":
+                                    playerNum = getPlayerNum(server, message.event.player);
+
+                                    if (playerNum) {
+                                        server.players[playerNum].hyperorb = false;
                                     }
 
                                     break;
@@ -666,6 +742,8 @@ var app = angular.module("ddsn", []),
                                     if (playerNum) {
                                         server.players[playerNum].connected = false;
                                         server.players[playerNum].timeInGame = message.event.connected;
+                                        server.players[playerNum].hyperorb = false;
+                                        server.players[playerNum].flags = [];
                                     }
 
                                     break;
@@ -675,6 +753,8 @@ var app = angular.module("ddsn", []),
                                     if (playerNum) {
                                         server.players[playerNum].connected = true;
                                         server.players[playerNum].observing = true;
+                                        server.players[playerNum].hyperorb = false;
+                                        server.players[playerNum].flags = [];
                                     }
 
                                     break;
@@ -693,6 +773,7 @@ var app = angular.module("ddsn", []),
                                     if (playerNum) {
                                         server.players[playerNum].connected = true;
                                         server.players[playerNum].teamName = message.event.team;
+                                        server.players[playerNum].flags = [];
                                     }
 
                                     break;
@@ -704,6 +785,7 @@ var app = angular.module("ddsn", []),
                                     break;
                                 case "startlevel":
                                     server.startTime = new Date().getTime();
+                                    server.endTime = undefined;
                                     server.console = [];
                                     server.events = [];
                                     server.players = [];
@@ -712,6 +794,8 @@ var app = angular.module("ddsn", []),
                                     server.logs.push(message.event.log);
                                     break;
                             }
+
+                            server.events.push(message.event);
 
                             scope.$apply();
                         });
@@ -754,6 +838,7 @@ var app = angular.module("ddsn", []),
                                     name: message.name,
                                     connected: true,
                                     opponents: {},
+                                    flags: [],
                                     kills: 0,
                                     deaths: 0,
                                     suicides: 0,
@@ -865,6 +950,17 @@ var app = angular.module("ddsn", []),
                             }
 
                             server.teams[message.teamName] = message.score;
+
+                            scope.$apply();
+                        });
+                        break;
+                    case "server.timeleft":
+                        getServer(message.port, function(server) {
+                            if (!server) {
+                                return;
+                            }
+
+                            server.endTime = new Date().getTime() + message.timeLeft * 1000;
 
                             scope.$apply();
                         });

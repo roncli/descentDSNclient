@@ -339,6 +339,25 @@ module.exports = function() {
                                     data = null;
                                 });
 
+                                server.on("gameinfo", function(info) {
+                                    var key;
+
+                                    for (key in info) {
+                                        if (info.hasOwnProperty(key)) {
+                                            switch (key) {
+                                                case "timeLeft":
+                                                    serverData.timeLeft = new Date().getTime() + info[key] * 1000;
+                                                    wss.broadcast({
+                                                        message: "server.timeleft",
+                                                        timeLeft: info[key],
+                                                        port: launcher.options.server.port
+                                                    });
+                                                    break;
+                                            }
+                                        }
+                                    }
+                                });
+
                                 server.on("kill", function(killer, killed, weapon) {
                                     var killerNum = getPlayerNum(killer),
                                         killedNum = getPlayerNum(killed);
@@ -372,6 +391,7 @@ module.exports = function() {
                                         }
                                         serverData.players[killedNum].opponents[killer].deaths++;
                                         serverData.players[killedNum].deaths++;
+                                        serverData.players[killedNum].flags = [];
                                     }
                                 });
 
@@ -381,6 +401,7 @@ module.exports = function() {
                                     if (playerNum) {
                                         serverData.players[playerNum].connected = true;
                                         serverData.players[playerNum].suicides++;
+                                        serverData.players[playerNum].flags = [];
                                     }
 
                                     addEvent({
@@ -395,6 +416,7 @@ module.exports = function() {
                                     if (playerNum) {
                                         serverData.players[playerNum].connected = true;
                                         serverData.players[playerNum].deaths++;
+                                        serverData.players[playerNum].flags = [];
                                     }
 
                                     addEvent({
@@ -438,11 +460,35 @@ module.exports = function() {
                                     });
                                 });
 
+                                server.on("flagpickup", function(player, team, flag) {
+                                    var playerNum = getPlayerNum(player);
+
+                                    if (playerNum) {
+                                        serverData.players[playerNum].flags.push(flag);
+                                    }
+
+                                    addEvent({
+                                        event: "flagpickup",
+                                        player: player,
+                                        team: team,
+                                        flag: flag
+                                    });
+                                });
+
+                                server.on("flagreturn", function(player, team) {
+                                    addEvent({
+                                        event: "flagreturn",
+                                        player: player,
+                                        team: team
+                                    });
+                                });
+
                                 server.on("flagscore", function(player, team, flag1, flag2, flag3) {
                                     var playerNum = getPlayerNum(player);
 
                                     if (playerNum) {
                                         serverData.players[playerNum].connected = true;
+                                        serverData.players[playerNum].flags = [];
                                     }
 
                                     addEvent({
@@ -472,6 +518,40 @@ module.exports = function() {
                                     });
                                 });
 
+                                server.on("hyperorb", function(player) {
+                                    var playerNum = getPlayerNum(player);
+
+                                    if (playerNum) {
+                                        serverData.players[playerNum].hyperorb = true;
+                                    }
+
+                                    addEvent({
+                                        event: "hyperorb",
+                                        player: player
+                                    });
+                                });
+
+                                server.on("hyperorblost", function(player) {
+                                    var playerNum = getPlayerNum(player);
+
+                                    if (playerNum) {
+                                        serverData.players[playerNum].hyperorb = false;
+                                    }
+
+                                    addEvent({
+                                        event: "hyperorblost",
+                                        player: player
+                                    });
+                                });
+
+                                server.on("hyperorbscore", function(player, points) {
+                                    addEvent({
+                                        event: "hyperorbscore",
+                                        player: player,
+                                        points: points
+                                    });
+                                });
+
                                 server.on("joined", function(player, team) {
                                     addEvent({
                                         event: "joined",
@@ -486,6 +566,8 @@ module.exports = function() {
                                     if (playerNum) {
                                         serverData.players[playerNum].connected = false;
                                         serverData.players[playerNum].timeInGame = Math.ceil((new Date().getTime() - serverData.startTime) / 1000);
+                                        serverData.players[playerNum].hyperorb = false;
+                                        serverData.players[playerNum].flags = [];
                                     }
 
                                     addEvent({
@@ -501,6 +583,8 @@ module.exports = function() {
                                     if (playerNum) {
                                         serverData.players[playerNum].connected = false;
                                         serverData.players[playerNum].timeInGame = Math.ceil((new Date().getTime() - serverData.startTime) / 1000);
+                                        serverData.players[playerNum].hyperorb = false;
+                                        serverData.players[playerNum].flags = [];
                                     }
 
                                     addEvent({
@@ -516,6 +600,8 @@ module.exports = function() {
                                     if (playerNum) {
                                         serverData.players[playerNum].connected = true;
                                         serverData.players[playerNum].observing = true;
+                                        serverData.players[playerNum].hyperorb = false;
+                                        serverData.players[playerNum].flags = [];
                                     }
 
                                     addEvent({
@@ -544,6 +630,7 @@ module.exports = function() {
                                     if (playerNum) {
                                         serverData.players[playerNum].connected = true;
                                         serverData.players[playerNum].teamName = team;
+                                        serverData.players[playerNum].flags = [];
                                     }
 
                                     addEvent({
@@ -602,6 +689,7 @@ module.exports = function() {
                                             name: name,
                                             connected: true,
                                             opponents: {},
+                                            flags: [],
                                             kills: 0,
                                             deaths: 0,
                                             suicides: 0,
@@ -659,6 +747,7 @@ module.exports = function() {
                                     fs.writeFile(filename, JSON.stringify(serverData));
 
                                     serverData.startTime = date.getTime();
+                                    serverData.endTime = undefined;
                                     serverData.console = [];
                                     serverData.events = [];
                                     serverData.players = [];

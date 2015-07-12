@@ -1,50 +1,95 @@
-<div ng-switch="data.currentServer.settings.game.scriptName.toLowerCase()">
-    <div ng-switch-when="anarchy">
-        <table class="table table-condensed">
-            <tr ng-class="'player' + player.playerNum.toString()" ng-repeat="player in data.currentServer.players | filter: {role: 'client', connected: true} | orderBy: '-points'">
-                <td style="vertical-align: middle;">
-                    <div style="width: 32px; height: 32px; background-image: url('/images/{{player.ship}}.png'); background-size: 32px 32px;"></div>
-                </td>
-                <td class="h3" style="vertical-align: middle;">
-                    {{player.name}}
-                </td>
-                <td class="h3 text-right" style="vertical-align: middle;">
-                    {{player.points}}
-                </td>
-                <td class="text-center" style="vertical-align: middle;">
-                    {{player.kills}} / {{player.deaths}} / {{player.suicides}}
-                </td>
-                <td class="text-right" style="vertical-align: middle;">
-                    {{player.kills + player.deaths + player.suicides === 0 ? "0.00" : (player.kills * 100 / (player.kills + player.deaths + player.suicides)).toFixed(2)}}
-                </td>
-                <td class="text-right" style="vertical-align: middle;">
-                    {{player.ping ? player.ping.toString() + " ms" : ""}}
-                </td>
-            </tr>
-            <tr class="muted" ng-repeat="player in data.currentServer.players | filter: {role: 'client', connected: false} | orderBy: '-points'">
-                <td></td>
-                <td>
-                    {{player.name}}
-                </td>
-                <td CLASS="text-right">
-                    {{player.points}}
-                </td>
-                <td class="text-center">
-                    {{player.kills}} / {{player.deaths}} / {{player.suicides}}
-                </td>
-                <td class="text-right">
-                    {{player.kills + player.deaths + player.suicides === 0 ? "0.00" : (player.kills * 100 / (player.kills + player.deaths + player.suicides)).toFixed(2)}}
-                </td>
-                <td></td>
-            </tr>
-        </table>
-    </div>
-    <div ng-switch-default>
-        There is no scoreboard available for this game mode.
-    </div>
+<div class="h3 text-center"><chrono ng-if="data.currentServer.endTime" direction="down" time="{{data.currentServer.endTime}}"></chrono><chrono ng-if="!data.currentServer.endTime" direction="up" time="{{data.currentServer.startTime}}"></chrono></div>
+<div ng-if="['anarchy', 'co-op', 'hoard', 'hyper-anarchy', 'robo-anarchy'].indexOf(data.currentServer.settings.game.scriptName.toLowerCase()) !== -1">
+    <table class="table table-condensed">
+        <tr ng-class="'player' + player.playerNum.toString()" ng-repeat="player in data.currentServer.players | filter: {role: 'client', connected: true} | orderBy: '-points'">
+            <td style="vertical-align: middle;">
+                <div style="width: 32px; height: 32px; background-image: url('/images/{{player.ship}}.png'); background-size: 32px 32px;"></div>
+            </td>
+            <td class="h3" style="vertical-align: middle;">
+                <span ng-if="player.observing" class="glyphicon glyphicon-eye-open text-info"></span> {{player.name}}<img style="width: 32px; height: 32px;" ng-if="player.hyperorb" src="/images/hyperorb.png" />
+            </td>
+            <td class="h3 text-right" style="vertical-align: middle;">
+                {{player.points}}
+            </td>
+            <td class="text-center" style="vertical-align: middle;">
+                {{player.kills}} / {{player.deaths}} / {{player.suicides}}
+            </td>
+            <td class="text-right" style="vertical-align: middle;">
+                {{player.kills + player.deaths + player.suicides === 0 ? "0.00" : (player.kills * 100 / (player.kills + player.deaths + player.suicides)).toFixed(2)}}
+            </td>
+            <td class="text-right" style="vertical-align: middle;">
+                {{player.ping ? player.ping.toString() + " ms" : ""}}
+            </td>
+        </tr>
+        <tr ng-repeat="player in data.currentServer.players | filter: {role: 'client', connected: false} | orderBy: '-points'">
+            <td></td>
+            <td>
+                {{player.name}}
+            </td>
+            <td CLASS="text-right">
+                {{player.points}}
+            </td>
+            <td class="text-center">
+                {{player.kills}} / {{player.deaths}} / {{player.suicides}}
+            </td>
+            <td class="text-right">
+                {{player.kills + player.deaths + player.suicides === 0 ? "0.00" : (player.kills * 100 / (player.kills + player.deaths + player.suicides)).toFixed(2)}}
+            </td>
+            <td></td>
+        </tr>
+    </table>
+</div>
+<div ng-if="['ctf', 'entropy', 'monsterball', 'team anarchy'].indexOf(data.currentServer.settings.game.scriptName.toLowerCase()) !== -1">
+    <table class="table table-condensed">
+        <tr ng-class="'h3 player' + data.currentServer.settings.game.setTeamName.indexOf(teamName)" ng-repeat="(teamName, points) in data.currentServer.teams | orderBy: '-points'">
+            <td style="width: 50%; text-align: right">{{teamName}}</td>
+            <td style="width: 50%;">{{points}}</td>
+        </tr>
+    </table>
+    <table class="table table-condensed">
+        <tr ng-class="'player' + data.currentServer.settings.game.setTeamName.indexOf(player.teamName)" ng-repeat="player in data.currentServer.players | filter: {role: 'client', connected: true} | orderBy: '-points'">
+            <td style="vertical-align: middle;">
+                <div style="width: 32px; height: 32px; background-image: url('/images/{{player.ship}}.png'); background-size: 32px 32px;"></div>
+            </td>
+            <td class="h3" style="vertical-align: middle;">
+                <span ng-if="player.observing" class="glyphicon glyphicon-eye-open text-info"></span> {{player.name}} <img ng-repeat="flag in player.flags" ng-src="/images/flag{{data.currentServer.settings.game.setTeamName.indexOf(flag)}}.png" style="max-width: 32px; max-height: 32px;" />
+            </td>
+            <td class="h3 text-right" style="vertical-align: middle;">
+                {{player.points}}
+            </td>
+            <td ng-if="data.currentServer.settings.game.scriptName.toLowerCase() === 'monsterball'" class="h3 text-right" style="vertical-align: middle;">
+                {{-player.blunders}}
+            </td>
+            <td class="text-center" style="vertical-align: middle;">
+                {{player.kills}} / {{player.deaths}} / {{player.suicides}}
+            </td>
+            <td class="text-right" style="vertical-align: middle;">
+                {{player.kills + player.deaths + player.suicides === 0 ? "0.00" : (player.kills * 100 / (player.kills + player.deaths + player.suicides)).toFixed(2)}}
+            </td>
+            <td class="text-right" style="vertical-align: middle;">
+                {{player.ping ? player.ping.toString() + " ms" : ""}}
+            </td>
+        </tr>
+        <tr ng-class="'player' + data.currentServer.settings.game.setTeamName.indexOf(player.teamName)" ng-repeat="player in data.currentServer.players | filter: {role: 'client', connected: false} | orderBy: '-points'">
+            <td></td>
+            <td>
+                {{player.name}}
+            </td>
+            <td CLASS="text-right">
+                {{player.points}}
+            </td>
+            <td class="text-center">
+                {{player.kills}} / {{player.deaths}} / {{player.suicides}}
+            </td>
+            <td class="text-right">
+                {{player.kills + player.deaths + player.suicides === 0 ? "0.00" : (player.kills * 100 / (player.kills + player.deaths + player.suicides)).toFixed(2)}}
+            </td>
+            <td></td>
+        </tr>
+    </table>
 </div>
 <div class="panel-body" style="max-height: 500px; overflow-y: scroll;">
-    <table class="table table-condensed">
+    <table ng-if="['anarchy', 'co-op', 'hoard', 'hyper-anarchy', 'robo-anarchy'].indexOf(data.currentServer.settings.game.scriptName.toLowerCase()) !== -1" class="table table-condensed">
         <tr ng-repeat="event in data.currentServer.events | orderBy: '-time'">
             <td class="text-right">
                 {{getTimestamp(event.time)}}
@@ -57,6 +102,21 @@
                     <div ng-switch-when="disconnected">
                         <span class="glyphicon glyphicon-flash text-warning"></span> <span ng-class="'player' + data.currentServer.playerNames[event.player]">{{event.player}}</span>
                     </div>
+                    <div ng-switch-when="endlevel">
+                        <span class="glyphicon glyphicon-flag text-danger"></span> End of Level
+                    </div>
+                    <div ng-switch-when="hoardscore">
+                        <span ng-class="'player' + data.currentServer.playerNames[event.player]">{{event.player}}</span> <img style="max-height: 20px;" src="/images/hoardorb.png"/>x{{(Math.sqrt(8 * event.score + 1) - 1) / 2}} = {{event.score}} points
+                    </div>
+                    <div ng-switch-when="hyperorb">
+                        <span ng-class="'player' + data.currentServer.playerNames[event.player]">{{event.player}}</span> <img style="max-height: 20px;" src="/images/hyperorb.png"/> Found
+                    </div>
+                    <div ng-switch-when="hyperorblost">
+                        <span ng-class="'player' + data.currentServer.playerNames[event.player]">{{event.player}}</span> <img style="max-height: 20px;" src="/images/hyperorb.png"/> Lost
+                    </div>
+                    <div ng-switch-when="hyperorbscore">
+                        <span ng-class="'player' + data.currentServer.playerNames[event.player]">{{event.player}}</span> <img style="max-height: 20px;" src="/images/hyperorb.png"/> +{{event.points}} Points
+                    </div>
                     <div ng-switch-when="left">
                         <span class="glyphicon glyphicon-remove text-danger"></span> <span ng-class="'player' + data.currentServer.playerNames[event.player]">{{event.player}}</span>
                     </div>
@@ -64,7 +124,7 @@
                         <span class="glyphicon glyphicon-plus text-success"></span> <span ng-class="'player' + data.currentServer.playerNames[event.player]">{{event.player}}</span>
                     </div>
                     <div ng-switch-when="kill">
-                        <span ng-class="'player' + data.currentServer.playerNames[event.killer]">{{event.killer}}</span> <span class="glyphicon glyphicon-screenshot"></span> <span ng-class="'player' + data.currentServer.playerNames[event.killed]">{{event.killed}}</span> <span ng-if="event.weapon"><img style="max-height: 20px; max-width: 32px;" src="/images/{{(event.weapon === 'flare' && data.currentServer.players[data.currentServer.playerNames[event.killer]].ship === 'Black Pyro' ? 'green' : '') + event.weapon}}.png" /></span>
+                        <span ng-class="'player' + data.currentServer.playerNames[event.killer]">{{event.killer}}</span> <span class="glyphicon glyphicon-screenshot"></span> <span ng-class="'player' + data.currentServer.playerNames[event.killed]">{{event.killed}}</span> <span ng-if="event.weapon"><img style="max-height: 20px; max-width: 32px;" ng-src="/images/{{(event.weapon === 'flare' && data.currentServer.players[data.currentServer.playerNames[event.killer]].ship === 'Black Pyro' ? 'green' : '') + event.weapon}}.png" /></span>
                     </div>
                     <div ng-switch-when="observing">
                         <span class="glyphicon glyphicon-eye-open text-info"></span> <span ng-class="'player' + data.currentServer.playerNames[event.player]">{{event.player}}</span>
@@ -72,11 +132,79 @@
                     <div ng-switch-when="robotdeath">
                         Robot <span class="glyphicon glyphicon-screenshot"></span> <span ng-class="'player' + data.currentServer.playerNames[event.player]">{{event.player}}</span>
                     </div>
+                    <div ng-switch-when="startlevel">
+                        <span class="glyphicon glyphicon-flag text-success"></span> Start of Level
+                    </div>
                     <div ng-switch-when="suicide">
                         <span ng-class="'player' + data.currentServer.playerNames[event.player]">{{event.player}}</span> <span class="glyphicon glyphicon-fire text-danger"></span>
                     </div>
                     <div ng-switch-when="unobserving">
                         <span class="glyphicon glyphicon-eye-close text-info"></span> <span ng-class="'player' + data.currentServer.playerNames[event.player]">{{event.player}}</span>
+                    </div>
+                    <div ng-switch-default>
+                        {{event.event}}
+                    </div>
+                </div>
+            </td>
+        </tr>
+    </table>
+    <table ng-if="['ctf', 'entropy', 'monsterball', 'team anarchy'].indexOf(data.currentServer.settings.game.scriptName.toLowerCase()) !== -1" class="table table-condensed">
+        <tr ng-repeat="event in data.currentServer.events | orderBy: '-time'">
+            <td class="text-right">
+                {{getTimestamp(event.time)}}
+            </td>
+            <td>
+                <div ng-switch="event.event">
+                    <div ng-switch-when="death">
+                        <span ng-class="'player' + data.currentServer.settings.game.setTeamName.indexOf(data.currentServer.players[data.currentServer.playerNames[event.player]].teamName)">{{event.player}}</span> <span class="glyphicon glyphicon-fire text-warning"></span>
+                    </div>
+                    <div ng-switch-when="disconnected">
+                        <span class="glyphicon glyphicon-flash text-warning"></span> <span ng-class="'player' + data.currentServer.settings.game.setTeamName.indexOf(data.currentServer.players[data.currentServer.playerNames[event.player]].teamName)">{{event.player}}</span>
+                    </div>
+                    <div ng-switch-when="endlevel">
+                        <span class="glyphicon glyphicon-flag text-danger"></span> End of Level
+                    </div>
+                    <div ng-switch-when="entropybase">
+                        <span ng-class="'player' + data.currentServer.settings.game.setTeamName.indexOf(data.currentServer.players[data.currentServer.playerNames[event.player]].teamName)">{{event.player}}</span> <img style="max-height: 20px;" ng-src="/images/{{event.base.toLowerCase()}}{{data.currentServer.settings.game.setTeamName.indexOf(event.team)}}.png"/>
+                    </div>
+                    <div ng-switch-when="flagpickup">
+                        <span ng-class="'player' + data.currentServer.settings.game.setTeamName.indexOf(data.currentServer.players[data.currentServer.playerNames[event.player]].teamName)">{{event.player}}</span> <img style="max-height: 20px;" ng-src="/images/flag{{data.currentServer.settings.game.setTeamName.indexOf(event.flag)}}.png"/> Pickup
+                    </div>
+                    <div ng-switch-when="flagreturn">
+                        <span ng-class="'player' + data.currentServer.settings.game.setTeamName.indexOf(data.currentServer.players[data.currentServer.playerNames[event.player]].teamName)">{{event.player}}</span> <img style="max-height: 20px;" ng-src="/images/flag{{data.currentServer.settings.game.setTeamName.indexOf(event.team)}}.png"/> Returned
+                    </div>
+                    <div ng-switch-when="flagscore">
+                        <span ng-class="'player' + data.currentServer.settings.game.setTeamName.indexOf(data.currentServer.players[data.currentServer.playerNames[event.player]].teamName)">{{event.player}}</span> <img style="max-height: 20px;" ng-src="/images/flag{{data.currentServer.settings.game.setTeamName.indexOf(event.flag1)}}.png" /><img ng-if="event.flag2" style="max-height: 20px;" ng-src="/images/flag{{data.currentServer.settings.game.setTeamName.indexOf(event.flag2)}}.png" /><img ng-if="event.flag3" style="max-height: 20px;" ng-src="/images/flag{{data.currentServer.settings.game.setTeamName.indexOf(event.flag3)}}.png" /> <span ng-class="'player' + data.currentServer.settings.game.setTeamName.indexOf(event.team)">{{event.team}}</span> Scored
+                    </div>
+                    <div ng-switch-when="left">
+                        <span class="glyphicon glyphicon-remove text-danger"></span> <span ng-class="'player' + data.currentServer.settings.game.setTeamName.indexOf(data.currentServer.players[data.currentServer.playerNames[event.player]].teamName)">{{event.player}}</span>
+                    </div>
+                    <div ng-switch-when="joined">
+                        <span class="glyphicon glyphicon-plus text-success"></span> <span ng-class="'player' + data.currentServer.settings.game.setTeamName.indexOf(data.currentServer.players[data.currentServer.playerNames[event.player]].teamName)">{{event.player}}</span> <span ng-class="'player' + data.currentServer.settings.game.setTeamName.indexOf(event.team)">{{event.team}}</span>
+                    </div>
+                    <div ng-switch-when="kill">
+                        <span ng-class="'player' + data.currentServer.settings.game.setTeamName.indexOf(data.currentServer.players[data.currentServer.playerNames[event.killer]].teamName)">{{event.killer}}</span> <span class="glyphicon glyphicon-screenshot"></span> <span ng-class="'player' + data.currentServer.settings.game.setTeamName.indexOf(data.currentServer.players[data.currentServer.playerNames[event.killed]].teamName)">{{event.killed}}</span> <span ng-if="event.weapon"><img style="max-height: 20px; max-width: 32px;" ng-src="/images/{{(event.weapon === 'flare' && data.currentServer.players[data.currentServer.playerNames[event.killer]].ship === 'Black Pyro' ? 'green' : '') + event.weapon}}.png" /></span>
+                    </div>
+                    <div ng-switch-when="monsterballblunder">
+                        <span ng-class="'player' + data.currentServer.settings.game.setTeamName.indexOf(data.currentServer.players[data.currentServer.playerNames[event.player]].teamName)">{{event.player}}</span> <span class="glyphicon glyphicon-record text-success"></span> <span ng-class="'player' + data.currentServer.settings.game.setTeamName.indexOf(event.team)">{{event.team}}</span>
+                    </div>
+                    <div ng-switch-when="monsterballpoint">
+                        <span ng-class="'player' + data.currentServer.settings.game.setTeamName.indexOf(data.currentServer.players[data.currentServer.playerNames[event.player]].teamName)">{{event.player}}</span> <span class="glyphicon glyphicon-record text-danger"></span> <span ng-class="'player' + data.currentServer.settings.game.setTeamName.indexOf(event.team)">{{event.team}}</span>
+                    </div>
+                    <div ng-switch-when="observing">
+                        <span class="glyphicon glyphicon-eye-open text-info"></span> <span ng-class="'player' + data.currentServer.settings.game.setTeamName.indexOf(data.currentServer.players[data.currentServer.playerNames[event.player]].teamName)">{{event.player}}</span>
+                    </div>
+                    <div ng-switch-when="startlevel">
+                        <span class="glyphicon glyphicon-flag text-success"></span> Start of Level
+                    </div>
+                    <div ng-switch-when="suicide">
+                        <span ng-class="'player' + data.currentServer.settings.game.setTeamName.indexOf(data.currentServer.players[data.currentServer.playerNames[event.player]].teamName)">{{event.player}}</span> <span class="glyphicon glyphicon-fire text-danger"></span>
+                    </div>
+                    <div ng-switch-when="teamchange">
+                        <span ng-class="'player' + data.currentServer.settings.game.setTeamName.indexOf(data.currentServer.players[data.currentServer.playerNames[event.player]].teamName)">{{event.player}}</span> <span class="glyphicon glyphicon-share-alt text-info"></span> <span ng-class="'player' + data.currentServer.settings.game.setTeamName.indexOf(event.team)">{{event.team}}</span>
+                    </div>
+                    <div ng-switch-when="unobserving">
+                        <span class="glyphicon glyphicon-eye-close text-info"></span> <span ng-class="'player' + data.currentServer.settings.game.setTeamName.indexOf(data.currentServer.players[data.currentServer.playerNames[event.player]].teamName)">{{event.player}}</span>
                     </div>
                     <div ng-switch-default>
                         {{event.event}}
