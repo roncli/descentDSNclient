@@ -277,7 +277,7 @@ module.exports = function() {
                                 console: [],
                                 events: [],
                                 players: [],
-                                teams: {},
+                                teams: [],
                                 playerNames: {},
                                 loading: true,
                                 logs: []
@@ -294,6 +294,10 @@ module.exports = function() {
 
                                     getPlayerNum = function(player) {
                                         return serverData.playerNames[player];
+                                    },
+
+                                    getTeamNum = function(team) {
+                                        return serverData.settings.game.setTeamName.indexOf(team);
                                     },
 
                                     addEvent = function(event) {
@@ -333,10 +337,10 @@ module.exports = function() {
                                 });
 
                                 server.on("close", function() {
-                                    servers.data.splice(servers.data.indexOf(data), 1);
+                                    servers.data.splice(servers.data.indexOf(serverData), 1);
                                     servers.servers.splice(servers.servers.indexOf(server), 1);
                                     server = null;
-                                    data = null;
+                                    serverData = null;
                                 });
 
                                 server.on("gameinfo", function(info) {
@@ -650,7 +654,16 @@ module.exports = function() {
                                 });
 
                                 server.on("teamscore", function(teamName, score) {
-                                    serverData.teams[teamName] = score;
+                                    var teamNum = getTeamNum(teamName);
+
+                                    if (teamNum || teamNum === 0) {
+                                        if (!serverData.teams[teamNum]) {
+                                            serverData.teams[teamNum] = {
+                                                teamName: teamName
+                                            };
+                                        }
+                                        serverData.teams[teamNum].points = score;
+                                    }
                                 });
 
                                 server.on("teamplayerscore", function(player, teamName, points, kills, deaths, suicides, ping) {
@@ -751,7 +764,7 @@ module.exports = function() {
                                     serverData.console = [];
                                     serverData.events = [];
                                     serverData.players = [];
-                                    serverData.teams = {};
+                                    serverData.teams = [];
                                     serverData.playerNames = {};
                                     serverData.logs.push({
                                         date: date,

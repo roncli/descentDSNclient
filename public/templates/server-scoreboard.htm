@@ -40,10 +40,10 @@
     </table>
 </div>
 <div ng-if="['ctf', 'entropy', 'monsterball', 'team anarchy'].indexOf(data.currentServer.settings.game.scriptName.toLowerCase()) !== -1">
-    <table class="table table-condensed">
-        <tr ng-class="'h3 player' + data.currentServer.settings.game.setTeamName.indexOf(teamName)" ng-repeat="(teamName, points) in data.currentServer.teams | orderBy: '-points'">
-            <td style="width: 50%; text-align: right">{{teamName}}</td>
-            <td style="width: 50%;">{{points}}</td>
+    <table ng-if="data.currentServer.teams.length > 0" class="table table-condensed">
+        <tr ng-class="'h3 player' + data.currentServer.settings.game.setTeamName.indexOf(team.teamName)" ng-repeat="team in data.currentServer.teams | orderBy: '-points'">
+            <td style="width: 50%; text-align: right">{{team.teamName}}</td>
+            <td style="width: 50%;">{{team.points}}</td>
         </tr>
     </table>
     <table class="table table-condensed">
@@ -70,7 +70,7 @@
                 {{player.ping ? player.ping.toString() + " ms" : ""}}
             </td>
         </tr>
-        <tr ng-class="'player' + data.currentServer.settings.game.setTeamName.indexOf(player.teamName)" ng-repeat="player in data.currentServer.players | filter: {role: 'client', connected: false} | orderBy: '-points'">
+        <tr ng-repeat="player in data.currentServer.players | filter: {role: 'client', connected: false} | orderBy: '-points'">
             <td></td>
             <td>
                 {{player.name}}

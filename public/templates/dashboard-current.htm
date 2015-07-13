@@ -1,0 +1,86 @@
+<div class="row">
+    <div class="col-xs-4" ng-repeat-start="server in data.servers">
+        <div class="text-center">
+            <div class="btn btn-default" ng-click="openServer(server.settings.server.port)">{{server.settings.game.gameName}} <span class="glyphicon glyphicon-arrow-right"></span> {{server.settings.server.port}}</div>
+        </div>
+        <div ng-if="server.startTime" class="h3 text-center" style="margin-top: 0; margin-bottom: 0;"><chrono ng-if="server.endTime" direction="down" time="{{server.endTime}}"></chrono><chrono ng-if="!server.endTime" direction="up" time="{{server.startTime}}"></chrono></div>
+        <div ng-if="['anarchy', 'co-op', 'hoard', 'hyper-anarchy', 'robo-anarchy'].indexOf(server.settings.game.scriptName.toLowerCase()) !== -1">
+            <table class="table table-condensed">
+                <tr ng-class="'player' + player.playerNum.toString()" ng-repeat="player in server.players | filter: {role: 'client', connected: true} | orderBy: '-points'">
+                    <td style="vertical-align: middle;">
+                        <div style="width: 32px; height: 32px; background-image: url('/images/{{player.ship}}.png'); background-size: 32px 32px;"></div>
+                    </td>
+                    <td class="h3" style="vertical-align: middle;">
+                        <span ng-if="player.observing" class="glyphicon glyphicon-eye-open text-info"></span> {{player.name}}<img style="width: 32px; height: 32px;" ng-if="player.hyperorb" src="/images/hyperorb.png" />
+                    </td>
+                    <td class="h3 text-right" style="vertical-align: middle;">
+                        {{player.points}}
+                    </td>
+                    <td class="text-center" style="vertical-align: middle;">
+                        {{player.kills}} / {{player.deaths}} / {{player.suicides}}
+                    </td>
+                    <td class="text-right" style="vertical-align: middle;">
+                        {{player.ping ? player.ping.toString() + " ms" : ""}}
+                    </td>
+                </tr>
+                <tr ng-repeat="player in server.players | filter: {role: 'client', connected: false} | orderBy: '-points'">
+                    <td></td>
+                    <td>
+                        {{player.name}}
+                    </td>
+                    <td CLASS="text-right">
+                        {{player.points}}
+                    </td>
+                    <td class="text-center">
+                        {{player.kills}} / {{player.deaths}} / {{player.suicides}}
+                    </td>
+                    <td></td>
+                </tr>
+            </table>
+        </div>
+        <div ng-if="['ctf', 'entropy', 'monsterball', 'team anarchy'].indexOf(server.settings.game.scriptName.toLowerCase()) !== -1">
+            <table ng-if="server.teams.length > 0" class="table table-condensed">
+                <tr ng-class="'h3 player' + server.settings.game.setTeamName.indexOf(team.teamName)" ng-repeat="team in server.teams | orderBy: '-points'">
+                    <td style="width: 50%; text-align: right">{{team.teamName}}</td>
+                    <td style="width: 50%;">{{team.points}}</td>
+                </tr>
+            </table>
+            <table class="table table-condensed">
+                <tr ng-class="'player' + server.settings.game.setTeamName.indexOf(player.teamName)" ng-repeat="player in server.players | filter: {role: 'client', connected: true} | orderBy: '-points'">
+                    <td style="vertical-align: middle;">
+                        <div style="width: 32px; height: 32px; background-image: url('/images/{{player.ship}}.png'); background-size: 32px 32px;"></div>
+                    </td>
+                    <td class="h3" style="vertical-align: middle;">
+                        <span ng-if="player.observing" class="glyphicon glyphicon-eye-open text-info"></span> {{player.name}} <img ng-repeat="flag in player.flags" ng-src="/images/flag{{server.settings.game.setTeamName.indexOf(flag)}}.png" style="max-width: 32px; max-height: 32px;" />
+                    </td>
+                    <td class="h3 text-right" style="vertical-align: middle;">
+                        {{player.points}}
+                    </td>
+                    <td ng-if="server.settings.game.scriptName.toLowerCase() === 'monsterball'" class="h3 text-right" style="vertical-align: middle;">
+                        {{-player.blunders}}
+                    </td>
+                    <td class="text-center" style="vertical-align: middle;">
+                        {{player.kills}} / {{player.deaths}} / {{player.suicides}}
+                    </td>
+                    <td class="text-right" style="vertical-align: middle;">
+                        {{player.ping ? player.ping.toString() + " ms" : ""}}
+                    </td>
+                </tr>
+                <tr ng-repeat="player in server.players | filter: {role: 'client', connected: false} | orderBy: '-points'">
+                    <td></td>
+                    <td>
+                        {{player.name}}
+                    </td>
+                    <td CLASS="text-right">
+                        {{player.points}}
+                    </td>
+                    <td class="text-center">
+                        {{player.kills}} / {{player.deaths}} / {{player.suicides}}
+                    </td>
+                    <td></td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    <div ng-repeat-end ng-if="$index < data.servers.length && $index % 3 === 2" class="clearfix"></div>
+</div>

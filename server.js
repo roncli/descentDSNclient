@@ -51,6 +51,12 @@ Server.prototype.connect = function() {
                 reason: "failed",
                 port: server.settings.server.port
             });
+            if (server.console) {
+                server.console.removeAllListeners();
+                server.console.close();
+            }
+            server.emit("close");
+
             return;
         }
 

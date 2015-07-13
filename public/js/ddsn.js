@@ -4,6 +4,7 @@
 var app = angular.module("ddsn", []),
     data = {
         serverTab: "news",
+        dashboardMenuTab: "current",
         serverMenuTab: "scoreboard",
         addServerMenuTab: "saved",
         settingsMenuTab: "descent3",
@@ -144,6 +145,20 @@ var app = angular.module("ddsn", []),
         return {
             restrict: "E",
             templateUrl: "/templates/dashboard.htm"
+        };
+    });
+
+    app.directive("dashboardCurrent", function() {
+        return {
+            restrict: "E",
+            templateUrl: "/templates/dashboard-current.htm"
+        };
+    });
+
+    app.directive("dashboardPast", function() {
+        return {
+            restrict: "E",
+            templateUrl: "/templates/dashboard-past.htm"
         };
     });
 
@@ -290,6 +305,22 @@ var app = angular.module("ddsn", []),
             }
         };
 
+        $scope.getTeamArray = function(teams) {
+            var ret = [],
+                key;
+
+            for (key in teams) {
+                if (teams.hasOwnProperty(key)) {
+                    ret.push({
+                        teamName: key,
+                        points: teams[key]
+                    });
+                }
+            }
+
+            return ret;
+        };
+
         $scope.getTimestamp = function(time) {
             var seconds = time / 1000,
                 minutes, hours;
@@ -366,6 +397,10 @@ var app = angular.module("ddsn", []),
                     }, 0);
                 });
             }
+        };
+
+        $scope.openDashboard = function(screen) {
+            data.dashboardMenuTab = screen;
         };
 
         $scope.openAddServer = function(screen) {
@@ -524,7 +559,7 @@ var app = angular.module("ddsn", []),
                 console: [],
                 events: [],
                 players: [],
-                teams: {},
+                teams: [],
                 playerNames: {},
                 loading: true,
                 logs: []
@@ -578,6 +613,10 @@ var app = angular.module("ddsn", []),
 
                     getPlayerNum = function(server, player) {
                         return server.playerNames[player];
+                    },
+
+                    getTeamNum = function(server, team) {
+                        return server.settings.game.setTeamName.indexOf(team);
                     };
 
                 switch (message.message) {
@@ -600,7 +639,7 @@ var app = angular.module("ddsn", []),
                                 return;
                             }
 
-                            if (data.currentServer.settings.server.port === message.port) {
+                            if (data.currentServer && data.currentServer.settings.server.port === message.port) {
                                 data.currentServer = null;
                                 if (data.serverTab === "server") {
                                     data.serverTab = "dashboard";
@@ -789,7 +828,7 @@ var app = angular.module("ddsn", []),
                                     server.console = [];
                                     server.events = [];
                                     server.players = [];
-                                    server.teams = {};
+                                    server.teams = [];
                                     server.playerNames = {};
                                     server.logs.push(message.event.log);
                                     break;
@@ -945,11 +984,22 @@ var app = angular.module("ddsn", []),
                         break;
                     case "server.teamscore":
                         getServer(message.port, function(server) {
+                            var teamNum;
+
                             if (!server) {
                                 return;
                             }
 
-                            server.teams[message.teamName] = message.score;
+                            teamNum = getTeamNum(server, message.teamName);
+
+                            if (teamNum || teamNum === 0) {
+                                if (!server.teams[teamNum]) {
+                                    server.teams[teamNum] = {
+                                        teamName: message.teamName
+                                    };
+                                }
+                                server.teams[teamNum].points = message.score;
+                            }
 
                             scope.$apply();
                         });
