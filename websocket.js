@@ -134,7 +134,8 @@ module.exports = function() {
 
             // Parse any messages.
             ws.on("message", function(data) {
-                var message = JSON.parse(data);
+                var message = JSON.parse(data),
+                    savedServer;
 
                 switch (message.message) {
                     case "initialize":
@@ -255,7 +256,7 @@ module.exports = function() {
                         break;
                     case "launchserver":
                         randomPassword(function(err, password) {
-                            var launcher, savedServer, serverData, server;
+                            var launcher, serverData, server;
 
                             if (err) {
                                 ws.send(JSON.stringify({
@@ -883,6 +884,17 @@ module.exports = function() {
                                     });
                                 }));
                             });
+                        }
+
+                        break;
+                    case "settings.deletesavedserver":
+                        savedServer = settings.savedServers.filter(function(server) {
+                            return server.saveServerName === message.saveServerName;
+                        });
+
+                        if (savedServer.length > 0) {
+                            settings.savedServers.splice(settings.savedServers.indexOf(savedServer), 1);
+                            writeSettings(settings);
                         }
 
                         break;

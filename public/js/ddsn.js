@@ -556,6 +556,34 @@ var app = angular.module("ddsn", []),
             data.settings.addServer.allowed.shipsValid = data.settings.addServer.allowed.ships.blackpyro || data.settings.addServer.allowed.ships.magnumaht || data.settings.addServer.allowed.ships.phoenix || data.settings.addServer.allowed.ships.pyrogl;
         };
 
+        $scope.deleteSavedServer = function(server) {
+            data.settings.savedServers.splice(data.settings.savedServers.indexOf(server), 1);
+
+            ws.send(JSON.stringify({
+                message: "settings.deletesavedserver",
+                saveServerName: server.saveServerName
+            }));
+        };
+
+        $scope.quickLaunchServer = function(server) {
+            data.settings.addServer = JSON.stringify(JSON.parse(server));
+
+            data.settings.addServer.server.port = 2092;
+            data.settings.addServer.server.gamespyport = 20143;
+
+            while (data.servers.filter($scope.checkPort).length > 0) {
+                data.settings.addServer.server.port++;
+            }
+
+            while (data.servers.filter($scope.checkGameSpyPort).length > 0) {
+                data.settings.addServer.server.gamespyport++;
+            }
+
+            data.settings.addServer.saveServerName = undefined;
+
+            $scope.launchServer();
+        };
+
         $scope.launchServer = function() {
             var server, savedServer;
 

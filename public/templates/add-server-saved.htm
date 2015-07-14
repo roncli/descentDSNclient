@@ -1,0 +1,17 @@
+<div ng-if="data.settings.savedServers.length === 0" class="text-center">You do not have any saved servers to quick launch.</div>
+<div ng-if="data.settings.savedServers.length > 0">
+    <table class="table table-condensed">
+        <tr>
+            <td colspan="2">Select a server to quick launch.  Servers will be launched on port 2092 and GameSpy port 20143, or the first available port not in use.</td>
+        </tr>
+        <tr ng-repeat="server as data.settings.savedServers">
+            <td class="text-right">
+                {{server.saveServerName}}
+            </td>
+            <td>
+                <button class="btn btn-success" ng-click="quickLaunchServer(server)">Quick Launch</button>
+                <button class="btn btn-danger" ng-click="deleteSavedServer(server)"><span class="glyphicon glyphicon-remove"></span></button>
+            </td>
+        </tr>
+    </table>
+</div>
