@@ -11,7 +11,8 @@ var app = angular.module("ddsn", []),
         settings: {
             descent3: {
                 pathValid: false
-            }
+            },
+            savedServers: []
         },
         difficulties: [
             {difficulty: 0, name: "Trainee"},
@@ -21,7 +22,7 @@ var app = angular.module("ddsn", []),
             {difficulty: 4, name: "Insane"}
         ],
         selectMissionToggle: true,
-        servers: []
+        servers: [],
     },
 
     getServer = function(port, callback) {
@@ -272,6 +273,14 @@ var app = angular.module("ddsn", []),
 
         $scope.Math = Math;
 
+        $scope.checkPort = function(server) {
+            return server.settings.server.port === data.settings.addServer.server.port || server.settings.server.gamespyport === data.settings.addServer.server.port;
+        };
+
+        $scope.checkGameSpyPort = function(server) {
+            return server.settings.server.gamespyport === data.settings.addServer.server.gamespyport || server.settings.server.port === data.settings.addServer.server.gamespyport;
+        };
+
         $scope.getRegionName = function(regionId) {
             switch (regionId) {
                 case 0:
@@ -414,11 +423,13 @@ var app = angular.module("ddsn", []),
         $scope.updateAddServerServerPort = function() {
             data.settings.addServer.server.portValid = typeof data.settings.addServer.server.port === "number" && data.settings.addServer.server.port >= 0 && data.settings.addServer.server.port <= 65535 && data.settings.addServer.server.port % 1 === 0;
             data.settings.addServer.server.portsDiffer = data.settings.addServer.server.port !== data.settings.addServer.server.gamespyport;
+            data.settings.addServer.server.portInUse = data.servers.filter($scope.checkPort).length > 0;
         };
 
         $scope.updateAddServerServerGamespyport = function() {
             data.settings.addServer.server.gamespyportValid = typeof data.settings.addServer.server.gamespyport === "number" && data.settings.addServer.server.gamespyport >= 0 && data.settings.addServer.server.gamespyport <= 65535 && data.settings.addServer.server.gamespyport % 1 === 0;
             data.settings.addServer.server.portsDiffer = data.settings.addServer.server.port !== data.settings.addServer.server.gamespyport;
+            data.settings.addServer.server.gamespyportInUse = data.servers.filter($scope.checkGameSpyPort).length > 0;
         };
 
         $scope.updateAddServerServerFramerate = function() {
@@ -546,7 +557,7 @@ var app = angular.module("ddsn", []),
         };
 
         $scope.launchServer = function() {
-            var server;
+            var server, savedServer;
 
             data.settings.addServer.server.directory = data.settings.descent3.path;
             ws.send(JSON.stringify({
@@ -574,6 +585,33 @@ var app = angular.module("ddsn", []),
             data.currentServer = server;
             data.serverTab = "server";
             data.serverMenuTab = "scoreboard";
+            data.addServerMenuTab = "saved";
+
+            if (data.settings.addServer.saveServerName) {
+                savedServer = data.settings.savedServers.filter(function(server) {
+                    return server.saveServerName === data.settings.addServer.saveServerName;
+                });
+
+                if (savedServer.length > 0) {
+                    data.settings.savedServers.splice(data.settings.savedServers.indexOf(savedServer), 1);
+                }
+
+                data.settings.savedServers.push(JSON.parse(JSON.stringify(data.settings.addServer)));
+
+                data.settings.savedServers.sort(function(a, b) {
+                    return a.saveServerName.localeCompare(b.saveServerName);
+                });
+            }
+
+            data.settings.addServer = JSON.parse(JSON.stringify(data.settings.default));
+
+            while (data.servers.filter($scope.checkPort).length > 0) {
+                data.settings.addServer.server.port++;
+            }
+
+            while (data.servers.filter($scope.checkGameSpyPort).length > 0) {
+                data.settings.addServer.server.gamespyport++;
+            }
         };
 
         $scope.updateSettingsDescent3Path = function() {
@@ -622,6 +660,17 @@ var app = angular.module("ddsn", []),
                 switch (message.message) {
                     case "initservers":
                         data.servers = message.servers;
+
+                        if (data.settings.addServer) {
+                            while (data.servers.filter(scope.checkPort).length > 0) {
+                                data.settings.addServer.server.port++;
+                            }
+
+                            while (data.servers.filter(scope.checkGameSpyPort).length > 0) {
+                                data.settings.addServer.server.gamespyport++;
+                            }
+                        }
+
                         scope.$apply();
                         break;
                     case "missions":
@@ -648,6 +697,9 @@ var app = angular.module("ddsn", []),
 
                             data.servers.splice(data.servers.indexOf(server), 1);
                             server = null;
+
+                            scope.updateAddServerServerPort();
+                            scope.updateAddServerServerGamespyport();
 
                             // TODO: Notification that the server was closed.
 
@@ -1024,6 +1076,17 @@ var app = angular.module("ddsn", []),
                                     data.settings[key] = message.settings[key];
                                 }
                             }
+
+                            if (data.servers) {
+                                while (data.servers.filter(scope.checkPort).length > 0) {
+                                    data.settings.addServer.server.port++;
+                                }
+
+                                while (data.servers.filter(scope.checkGameSpyPort).length > 0) {
+                                    data.settings.addServer.server.gamespyport++;
+                                }
+                            }
+
                             scope.$apply();
                         }());
                         break;

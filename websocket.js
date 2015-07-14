@@ -255,7 +255,7 @@ module.exports = function() {
                         break;
                     case "launchserver":
                         randomPassword(function(err, password) {
-                            var launcher, serverData, server;
+                            var launcher, savedServer, serverData, server;
 
                             if (err) {
                                 ws.send(JSON.stringify({
@@ -271,6 +271,28 @@ module.exports = function() {
                             launcher.options.game.allowRemoteConsole = true;
                             launcher.options.game.consolePassword = password;
                             launcher.options.game.remoteConsolePort = launcher.options.server.port;
+
+                            if (launcher.options.saveServerName) {
+                                if (settings.savedServers) {
+                                    savedServer = settings.savedServers.filter(function(server) {
+                                        return server.saveServerName === launcher.options.saveServerName;
+                                    });
+
+                                    if (savedServer.length > 0) {
+                                        settings.savedServers.splice(settings.savedServers.indexOf(savedServer), 1);
+                                    }
+                                } else {
+                                    settings.savedServers = [];
+                                }
+
+                                settings.savedServers.push(JSON.parse(JSON.stringify(launcher.options)));
+
+                                settings.savedServers.sort(function(a, b) {
+                                    return a.saveServerName.localeCompare(b.saveServerName);
+                                });
+
+                                writeSettings(settings);
+                            }
 
                             serverData = {
                                 settings: launcher.options,

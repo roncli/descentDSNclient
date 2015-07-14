@@ -8,7 +8,7 @@
             <table class="table table-condensed">
                 <tr ng-class="'player' + player.playerNum.toString()" ng-repeat="player in server.players | filter: {role: 'client', connected: true} | orderBy: '-points'">
                     <td style="vertical-align: middle;">
-                        <div style="width: 32px; height: 32px; background-image: url('/images/{{player.ship}}.png'); background-size: 32px 32px;"></div>
+                        <div ng-if="player.ship" style="width: 32px; height: 32px; background-image: url('/images/{{player.ship}}.png'); background-size: 32px 32px;"></div>
                     </td>
                     <td class="h3" style="vertical-align: middle;">
                         <span ng-if="player.observing" class="glyphicon glyphicon-eye-open text-info"></span> {{player.name}}<img style="width: 32px; height: 32px;" ng-if="player.hyperorb" src="/images/hyperorb.png" />
@@ -48,7 +48,7 @@
             <table class="table table-condensed">
                 <tr ng-class="'player' + server.settings.game.setTeamName.indexOf(player.teamName)" ng-repeat="player in server.players | filter: {role: 'client', connected: true} | orderBy: '-points'">
                     <td style="vertical-align: middle;">
-                        <div style="width: 32px; height: 32px; background-image: url('/images/{{player.ship}}.png'); background-size: 32px 32px;"></div>
+                        <div ng-if="player.ship" style="width: 32px; height: 32px; background-image: url('/images/{{player.ship}}.png'); background-size: 32px 32px;"></div>
                     </td>
                     <td class="h3" style="vertical-align: middle;">
                         <span ng-if="player.observing" class="glyphicon glyphicon-eye-open text-info"></span> {{player.name}} <img ng-repeat="flag in player.flags" ng-src="/images/flag{{server.settings.game.setTeamName.indexOf(flag)}}.png" style="max-width: 32px; max-height: 32px;" />

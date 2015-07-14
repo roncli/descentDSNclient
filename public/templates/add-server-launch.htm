@@ -1,5 +1,7 @@
 <div class="alert alert-danger" role="alert" ng-if="!data.settings.addServer.server.portValid"><span class="glyphicon glyphicon-alert"></span> You must enter a valid port between 0 and 65535.</div>
+<div class="alert alert-danger" role="alert" ng-if="data.settings.addServer.server.portInUse"><span class="glyphicon glyphicon-alert"></span> This port is currently in use.</div>
 <div class="alert alert-danger" role="alert" ng-if="!data.settings.addServer.server.gamespyportValid"><span class="glyphicon glyphicon-alert"></span> You must enter a valid GameSpy port between 0 and 65535.</div>
+<div class="alert alert-danger" role="alert" ng-if="data.settings.addServer.server.gamespyportInUse"><span class="glyphicon glyphicon-alert"></span> This GameSpy port is currently in use.</div>
 <div class="alert alert-danger" role="alert" ng-if="!data.settings.addServer.server.portsDiffer"><span class="glyphicon glyphicon-alert"></span> Port and GameSpy port must be different.</div>
 <div class="alert alert-danger" role="alert" ng-if="!data.settings.addServer.server.framerateValid"><span class="glyphicon glyphicon-alert"></span> You must enter a framerate between 1 and 999.</div>
 <div class="alert alert-danger" role="alert" ng-if="data.settings.addServer.game.gameName.length === 0"><span class="glyphicon glyphicon-alert"></span> You must enter the name of the game.</div>
@@ -12,6 +14,10 @@
 <div class="alert alert-danger" role="alert" ng-if="!data.settings.addServer.game.audioTauntDelayValid"><span class="glyphicon glyphicon-alert"></span> You must enter a valid audio taunt delay greater than 0.</div>
 <div class="alert alert-danger" role="alert" ng-if="!data.settings.addServer.allowed.shipsValid"><span class="glyphicon glyphicon-alert"></span> You must select at least one ship.</div>
 <div ng-if="data.settings.addServer.server.portValid && data.settings.addServer.server.gamespyportValid && data.settings.addServer.server.portsDiffer && data.settings.addServer.server.framerateValid && data.settings.addServer.game.gameName.length !== 0 && data.settings.addServer.game.maxPlayersValid && data.settings.addServer.game.ppsValid && data.settings.addServer.game.killGoalValid && data.settings.addServer.game.timeLimitValid && data.settings.addServer.game.missionName && data.settings.addServer.game.respawnTimeValid && data.settings.addServer.game.audioTauntDelayValid && data.settings.addServer.allowed.shipsValid">
+    <div ng-class="{true: 'input-group', false: 'input-group has-error'}[data.settings.addServer.game.gameName.length > 0]">
+        <span class="input-group-addon">Save this server's settings for quick launching:</span>
+        <input type="text" class="form-control" placeholder="Enter a name to save these settings as" ng-model="data.settings.addServer.saveServerName"/>
+    </div><br />
     <div class="text-center">
         <button class="btn btn-lg btn-info" ng-click="launchServer()"><span class="glyphicon glyphicon-share"></span> Launch Server</button>
     </div>
