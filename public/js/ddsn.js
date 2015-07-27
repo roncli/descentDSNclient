@@ -566,7 +566,7 @@ var app = angular.module("ddsn", []),
         };
 
         $scope.quickLaunchServer = function(server) {
-            data.settings.addServer = JSON.stringify(JSON.parse(server));
+            data.settings.addServer = JSON.parse(JSON.stringify(server));
 
             data.settings.addServer.server.port = 2092;
             data.settings.addServer.server.gamespyport = 20143;

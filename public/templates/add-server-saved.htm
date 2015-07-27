@@ -4,13 +4,13 @@
         <tr>
             <td colspan="2">Select a server to quick launch.  Servers will be launched on port 2092 and GameSpy port 20143, or the first available port not in use.</td>
         </tr>
-        <tr ng-repeat="server as data.settings.savedServers">
+        <tr ng-repeat="server in data.settings.savedServers">
             <td class="text-right">
                 {{server.saveServerName}}
             </td>
             <td>
-                <button class="btn btn-success" ng-click="quickLaunchServer(server)">Quick Launch</button>
-                <button class="btn btn-danger" ng-click="deleteSavedServer(server)"><span class="glyphicon glyphicon-remove"></span></button>
+                <button class="btn btn-sm btn-success" ng-click="quickLaunchServer(server)">Quick Launch</button>
+                <button class="btn btn-sm btn-danger" ng-click="deleteSavedServer(server)"><span class="glyphicon glyphicon-remove"></span></button>
             </td>
         </tr>
     </table>
