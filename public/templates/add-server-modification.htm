@@ -1,0 +1,8 @@
+<div ng-if="data.currentAddServerMod">
+    <div ng-repeat="option in data.currentAddServerMod.options">
+        <div ng-class="{true: 'input-group', false: 'input-group has-error'}[modOptionIsValid(data.currentAddServerMod.name, option.name)]">
+            <span class="input-group-addon">{{option.description}}</span>
+            <input type="text" class="form-control" ng-model="data.settings.addServer.modifications[data.currentAddServerMod.name].option[option.name]" ng-blur="updateModOption(data.currentAddServerMod.name, option.name)"/>
+        </div>
+    </div>
+</div>

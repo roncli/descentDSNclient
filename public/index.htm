@@ -9,19 +9,22 @@
     <link rel="stylesheet" href="/css/player-colors.css"/>
 </head>
 <body>
-    <div class="jumbotron text-center" style="padding: 0;">
-        <h1>Descent DSN</h1>
-    </div>
-    <div class="container-fluid">
-        <div class="col-xs-12">
-            <offline ng-if="data.offline"></offline>
-            <error ng-if="data.error"></error>
-            <div ng-if="!data.offline && !data.error">
-                <server-tabs></server-tabs><br />
-                <content></content>
-            </div>
+<div class="jumbotron text-center" style="padding: 0;">
+    <h1>Descent DSN</h1>
+</div>
+<div class="container-fluid">
+    <div class="col-xs-12">
+        <offline ng-if="data.offline"></offline>
+        <error ng-if="data.error"></error>
+        <div ng-if="!data.offline && !data.error">
+            <server-tabs></server-tabs>
+            <br/>
+            <content></content>
         </div>
-    </div><br />
-    <div class="text-center text-muted small">Descent DSN &copy;2015 roncli Productions</div>
+    </div>
+</div>
+<br/>
+
+<div class="text-center text-muted small">Descent DSN &copy;2015-2016 roncli Productions</div>
 </body>
 </html>

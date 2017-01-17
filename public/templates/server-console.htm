@@ -3,3 +3,65 @@
         <div ng-repeat="line in data.currentServer.console | limitTo : -100 track by $index" style="white-space: pre;">{{line}}</div>
     </div>
 </div>
+<div class="input-group">
+    <span class="input-group-addon">Say:</span>
+    <input type="text" class="form-control" ng-model="data.settings.addServer.game.motd" />
+    <span class="input-group-btn">
+        <button class="btn btn-default">Send</button>
+    </span>
+</div><br />
+<div class="navbar navbar-inverse">
+    <ul class="nav navbar-nav">
+        <li class="dropup">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown">Server</a>
+            <ul class="dropdown-menu">
+                <li><a href="#">Set Maximum Players</a></li>
+                <li><a href="#">Set Goal Limit</a></li>
+                <li><a href="#">Set Time Limit</a></li>
+                <li><a href="#">Set Packets Per Second</a></li>
+                <li><a href="#">Set Powerup Respawn Time</a></li>
+                <li><a href="#">Set Server HUD Name Level</a></li>
+                <li class="divider"></li>
+                <li><a href="#">Warp to Level</a></li>
+                <li><a href="#">Force Players to Wait</a></li>
+                <li class="divider"></li>
+                <li><a href="#">Quit Server</a></li>
+            </ul>
+        </li>
+        <li class="dropup">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown">Teams</a>
+            <ul class="dropdown-menu">
+                <li><a href="#">Set Team Name</a></li>
+                <li><a href="#">Allow Team Change</a></li>
+                <li><a href="#">Auto Balance Teams</a></li>
+                <li class="divider"></li>
+                <li><a href="#">Change Team</a></li>
+                <li><a href="#">Balance Teams Now</a></li>
+            </ul>
+        </li>
+        <li class="dropup">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown">Stats</a>
+            <ul class="dropdown-menu">
+                <li><a href="#">Net Game Information</a></li>
+                <li><a href="#">List Players</a></li>
+                <li><a href="#">Player Information</a></li>
+                <li class="divider"></li>
+                <li><a href="#">Auto Save Stats on Disconnect</a></li>
+                <li><a href="#">Auto Save Stats on Level End</a></li>
+                <li class="divider"></li>
+                <li><a href="#">Save Stats Now</a></li>
+            </ul>
+        </li>
+        <li class="dropup">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown">Admin</a>
+            <ul class="dropdown-menu">
+                <li><a href="#">Ban List</a></li>
+                <li class="divider"></li>
+                <li><a href="#">Ban</a></li>
+                <li><a href="#">Remove Ban</a></li>
+                <li><a href="#">Kick</a></li>
+                <li><a href="#">Rehash hosts.allow and hosts.deny</a></li>
+            </ul>
+        </li>
+    </ul>
+</div>

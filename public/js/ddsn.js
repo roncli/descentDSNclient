@@ -247,6 +247,13 @@ var app = angular.module("ddsn", []),
         };
     });
 
+    app.directive("addServerModification", function() {
+        return {
+            restrict: "E",
+            templateUrl: "/templates/add-server-modification.htm"
+        };
+    });
+
     app.directive("addServerLaunch", function() {
         return {
             restrict: "E",
@@ -481,6 +488,12 @@ var app = angular.module("ddsn", []),
             data.settings.addServer.game.timeLimitValid = data.settings.addServer.game.timeLimit === null || (typeof data.settings.addServer.game.timeLimit === "number" && data.settings.addServer.game.timeLimit >= 1 && data.settings.addServer.game.timeLimit % 1 === 0);
         };
 
+        $scope.validModifications = function() {
+            return data.settings.modifications.filter(function(mod) {
+                return mod.valid;
+            });
+        };
+
         $scope.missionSearch = function() {
             if (!data.settings.addServer.game.missionSearch || data.settings.addServer.game.missionSearch.length < 2) {
                 return;
@@ -582,6 +595,25 @@ var app = angular.module("ddsn", []),
             data.settings.addServer.saveServerName = undefined;
 
             $scope.launchServer();
+        };
+
+        $scope.loadSavedServer = function(server) {
+            data.settings.addServer = JSON.parse(JSON.stringify(server));
+
+            data.settings.addServer.server.port = 2092;
+            data.settings.addServer.server.gamespyport = 20143;
+
+            while (data.servers.filter($scope.checkPort).length > 0) {
+                data.settings.addServer.server.port++;
+            }
+
+            while (data.servers.filter($scope.checkGameSpyPort).length > 0) {
+                data.settings.addServer.server.gamespyport++;
+            }
+
+            data.settings.addServer.saveServerName = undefined;
+
+            $scope.openAddServer("server");
         };
 
         $scope.launchServer = function() {
@@ -1112,6 +1144,43 @@ var app = angular.module("ddsn", []),
 
                                 while (data.servers.filter(scope.checkGameSpyPort).length > 0) {
                                     data.settings.addServer.server.gamespyport++;
+                                }
+                            }
+
+                            if (data.settings.modifications) {
+                                data.settings.modifications.forEach(function(mod) {
+                                    var fx;
+
+                                    try {
+                                        fx = new Function("return " + mod.code);
+                                        mod.codeValid = true;
+                                        mod.valid = true;
+                                    } catch (ex) {
+                                        mod.codeValid = false;
+                                        mod.valid = false;
+                                    }
+
+                                    if (mod.options) {
+                                        mod.options.forEach(function(option) {
+                                            if (option.validations) {
+                                                option.validations.forEach(function(validation) {
+                                                    var fx;
+                                                    try {
+                                                        fx = new Function("return " + validation.code);
+                                                        validation.fx = fx();
+                                                        validation.valid = true;
+                                                    } catch (ex) {
+                                                        validation.valid = false;
+                                                        mod.valid = false;
+                                                    }
+                                                });
+                                            }
+                                        });
+                                    }
+                                });
+
+                                if (scope.validModifications().length > 0) {
+                                    data.currentAddServerMod = scope.validModifications()[0];
                                 }
                             }
 

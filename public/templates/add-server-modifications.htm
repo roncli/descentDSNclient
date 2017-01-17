@@ -1,0 +1,6 @@
+<ul class="nav nav-pills">
+    <li role="presentation" ng-repeat="mod in validModifications()">
+        <button ng-class="{true: 'btn btn-success', false: 'btn btn-primary'}[data.currentAddServerMod === mod.name]" ng-click="openAddServerMod(mod.name)"><span class="glyphicon glyphicon-wrench"></span> {{mod.title}}</button>
+    </li>
+</ul>
+<add-server-modification></add-server-modification>

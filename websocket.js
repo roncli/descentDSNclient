@@ -107,6 +107,14 @@ module.exports = function() {
 
         wss = new WebSocket.Server({port: 20921});
 
+        wss.broadcast = function(message) {
+            message = JSON.stringify(message);
+
+            wss.clients.forEach(function(client) {
+                client.send(message);
+            });
+        };
+
         // Listen for new connections.
         wss.on("connection", function(ws) {
             var sendMissions = function(missions) {
@@ -122,14 +130,6 @@ module.exports = function() {
                         };
                     })
                 }));
-            };
-
-            wss.broadcast = function(message) {
-                message = JSON.stringify(message);
-
-                wss.clients.forEach(function(client) {
-                    client.send(message);
-                });
             };
 
             // Parse any messages.
@@ -191,6 +191,7 @@ module.exports = function() {
                                 settings.default.game.respawnTimeValid = true;
                                 settings.default.game.audioTauntDelayValid = true;
                                 settings.default.allowed.shipsValid = true;
+                                settings.default.modifications = [];
                                 settings.addServer = JSON.parse(JSON.stringify(settings.default));
 
                                 // Get network interfaces.
@@ -199,6 +200,64 @@ module.exports = function() {
                                     if (interfaces.hasOwnProperty(key)) {
                                         interfaces[key].forEach(addInterface);
                                     }
+                                }
+
+                                // Get mods.
+                                if (!settings.modifications) {
+                                    settings.modifications = [
+                                        {
+                                            name: "autoShutdown",
+                                            title: "Auto Shutdown",
+                                            description: "Shutdown the server after a period of inactivity.",
+                                            options: [
+                                                {
+                                                    name: "inactivity",
+                                                    description: "Minutes of inactivity to shutdown server after:",
+                                                    default: 5,
+                                                    validations: [
+                                                        {
+                                                            code:
+"function(param) {\
+    return typeof param === \"number\" && param > 0 && param % 1 === 0;\
+}",
+                                                            message: "You must enter a positive integer."
+                                                        }
+                                                    ]
+                                                }
+                                            ],
+                                            code:
+"function(server, options) {\
+    var players = 0,\
+        serverTimeout = null,\
+        timeout = function() {\
+            serverTimeout = setTimeout(function() {\
+                server.quit();\
+            }, options.inactivity * 60000);\
+        };\
+    \
+    server.on(\"joined\", function() {\
+        players++;\
+        clearTimeout(serverTimeout);\
+    });\
+    \
+    server.on(\"left\", function() {\
+        players--;\
+        if (players === 0) {\
+            timeout();\
+        }\
+    });\
+    \
+    server.on(\"disconnected\", function() {\
+        players--;\
+        if (players === 0) {\
+            timeout();\
+        }\
+    });\
+    \
+    timeout();\
+}"
+                                        }
+                                    ];
                                 }
 
                                 (function(callback) {
@@ -948,7 +1007,7 @@ module.exports = function() {
     });
 
     // Log any errors and restart the worker.
-    d.on("error2", function(err) {
+    d.on("error", function(err) {
         console.log("An error occurred:", err);
 
         if (wss) {
