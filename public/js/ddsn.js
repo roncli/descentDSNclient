@@ -1,7 +1,32 @@
-/*jslint browser: true*/
-/*global $, WebSocket, angular*/
-
 var app = angular.module("ddsn", []),
+
+    directives = [
+        {name: "offline", templateUrl: "/templates/offline.htm"},
+        {name: "error", templateUrl: "/templates/error.htm"},
+        {name: "serverTabs", templateUrl: "/templates/server-tabs.htm"},
+        {name: "content", templateUrl: "/templates/content.htm"},
+        {name: "news", templateUrl: "/templates/news.htm"},
+        {name: "dashboard", templateUrl: "/templates/dashboard.htm"},
+        {name: "dashboardCurrent", templateUrl: "/templates/dashboard/current.htm"},
+        {name: "dashboardPast", templateUrl: "/templates/dashboard/past.htm"},
+        {name: "server", templateUrl: "/templates/server.htm"},
+        {name: "serverScoreboard", templateUrl: "/templates/server/scoreboard.htm"},
+        {name: "serverConsole", templateUrl: "/templates/server/console.htm"},
+        {name: "serverLog", templateUrl: "/templates/server/log.htm"},
+        {name: "serverModifications", templateUrl: "/templates/server/modifications.htm"},
+        {name: "addServer", templateUrl: "/templates/add-server.htm"},
+        {name: "addServerSaved", templateUrl: "/templates/add-server/saved.htm"},
+        {name: "addServerServer", templateUrl: "/templates/add-server/server.htm"},
+        {name: "addServerGame", templateUrl: "/templates/add-server/game.htm"},
+        {name: "addServerAllowed", templateUrl: "/templates/add-server/allowed.htm"},
+        {name: "addServerModifications", templateUrl: "/templates/add-server/modifications.htm"},
+        {name: "addServerModification", templateUrl: "/templates/add-server/modification.htm"},
+        {name: "addServerLaunch", templateUrl: "/templates/add-server/launch.htm"},
+        {name: "settings", templateUrl: "/templates/settings.htm"},
+        {name: "settingsDescent3", templateUrl: "/templates/settings/descent3.htm"},
+        {name: "settingsModifications", templateUrl: "/templates/settings/modifications.htm"},
+    ],
+
     data = {
         serverTab: "news",
         dashboardMenuTab: "current",
@@ -22,54 +47,31 @@ var app = angular.module("ddsn", []),
             {difficulty: 4, name: "Insane"}
         ],
         selectMissionToggle: true,
-        servers: [],
+        servers: []
     },
 
-    getServer = function(port, callback) {
-        "use strict";
+    getServer = (port, callback) => data.servers.filter((item) => item.settings.server.port === port)[0],
+    checkPort = (server) => server.settings.server.port === data.settings.addServer.server.port || server.settings.server.gamespyport === data.settings.addServer.server.port,
+    checkGameSpyPort = (server) => server.settings.server.gamespyport === data.settings.addServer.server.gamespyport || server.settings.server.port === data.settings.addServer.server.gamespyport,
+    getPlayerNum = (server, player) => server.playerNames[player],
+    getTeamNum = (server, team) => server.settings.game.setTeamName.indexOf(team);
 
-        var server = data.servers.filter(function(item) {
-            return item.settings.server.port === port;
-        });
-
-        if (server) {
-            callback(server[0]);
-            return;
-        }
-
-        callback();
-    };
-
-(function() {
+(() => {
     "use strict";
 
     var ws, scope;
 
-    app.directive("convertToNumber", function() {
-        return {
-            require: "ngModel",
-            link: function(scope, element, attrs, ngModel) {
-                ngModel.$parsers.push(function(val) {
-                    return +val;
-                });
-                ngModel.$formatters.push(function(val) {
-                    return val ? val.toString() : "";
-                });
-            }
-        };
-    });
-
-    app.directive("chrono", ["$interval", function($interval) {
+    app.directive("chrono", ["$interval", ($interval) => {
         return {
             restrict: "E",
             scope: {
                 direction: "@",
                 time: "@"
             },
-            link: function(scope, element) {
+            link: (scope, element) => {
                 var seconds, minutes, hours, timer,
 
-                    tick = function() {
+                    tick = () => {
                         if (scope.direction === "down") {
                             seconds = Math.floor((scope.time - new Date().getTime()) / 1000);
                         } else {
@@ -98,7 +100,7 @@ var app = angular.module("ddsn", []),
 
                 tick();
 
-                element.on("$destroy", function() {
+                element.on("$destroy", () => {
                     $interval.cancel(timer);
                     timer = null;
                 });
@@ -107,188 +109,27 @@ var app = angular.module("ddsn", []),
         };
     }]);
 
-    app.directive("offline", function() {
-        return {
-            restrict: "E",
-            templateUrl: "/templates/offline.htm"
-        };
+    directives.forEach((directive) => {
+        app.directive(directive.name, () => {
+            return {
+                restrict: "E",
+                templateUrl: directive.templateUrl
+            }
+        });
     });
 
-    app.directive("error", function() {
-        return {
-            restrict: "E",
-            templateUrl: "/templates/error.htm"
-        };
-    });
-
-    app.directive("serverTabs", function() {
-        return {
-            restrict: "E",
-            templateUrl: "/templates/server-tabs.htm"
-        };
-    });
-
-    app.directive("content", function() {
-        return {
-            restrict: "E",
-            templateUrl: "/templates/content.htm"
-        };
-    });
-
-    app.directive("news", function() {
-        return {
-            restrict: "E",
-            templateUrl: "/templates/news.htm"
-        };
-    });
-
-    app.directive("dashboard", function() {
-        return {
-            restrict: "E",
-            templateUrl: "/templates/dashboard.htm"
-        };
-    });
-
-    app.directive("dashboardCurrent", function() {
-        return {
-            restrict: "E",
-            templateUrl: "/templates/dashboard-current.htm"
-        };
-    });
-
-    app.directive("dashboardPast", function() {
-        return {
-            restrict: "E",
-            templateUrl: "/templates/dashboard-past.htm"
-        };
-    });
-
-    app.directive("server", function() {
-        return {
-            restrict: "E",
-            templateUrl: "/templates/server.htm"
-        };
-    });
-
-    app.directive("serverScoreboard", function() {
-        return {
-            restrict: "E",
-            templateUrl: "/templates/server-scoreboard.htm"
-        };
-    });
-
-    app.directive("serverConsole", function() {
-        return {
-            restrict: "E",
-            templateUrl: "/templates/server-console.htm"
-        };
-    });
-
-    app.directive("serverLog", function() {
-        return {
-            restrict: "E",
-            templateUrl: "/templates/server-log.htm"
-        };
-    });
-
-    app.directive("serverModifications", function() {
-        return {
-            restrict: "E",
-            templateUrl: "/templates/server-modifications.htm"
-        };
-    });
-
-    app.directive("addServer", function() {
-        return {
-            restrict: "E",
-            templateUrl: "/templates/add-server.htm"
-        };
-    });
-
-    app.directive("settings", function() {
-        return {
-            restrict: "E",
-            templateUrl: "/templates/settings.htm"
-        };
-    });
-
-    app.directive("addServerSaved", function() {
-        return {
-            restrict: "E",
-            templateUrl: "/templates/add-server-saved.htm"
-        };
-    });
-
-    app.directive("addServerServer", function() {
-        return {
-            restrict: "E",
-            templateUrl: "/templates/add-server-server.htm"
-        };
-    });
-
-    app.directive("addServerGame", function() {
-        return {
-            restrict: "E",
-            templateUrl: "/templates/add-server-game.htm"
-        };
-    });
-
-    app.directive("addServerAllowed", function() {
-        return {
-            restrict: "E",
-            templateUrl: "/templates/add-server-allowed.htm"
-        };
-    });
-
-    app.directive("addServerModifications", function() {
-        return {
-            restrict: "E",
-            templateUrl: "/templates/add-server-modifications.htm"
-        };
-    });
-
-    app.directive("addServerModification", function() {
-        return {
-            restrict: "E",
-            templateUrl: "/templates/add-server-modification.htm"
-        };
-    });
-
-    app.directive("addServerLaunch", function() {
-        return {
-            restrict: "E",
-            templateUrl: "/templates/add-server-launch.htm"
-        };
-    });
-
-    app.directive("settingsDescent3", function() {
-        return {
-            restrict: "E",
-            templateUrl: "/templates/settings-descent3.htm"
-        };
-    });
-
-    app.directive("settingsModifications", function() {
-        return {
-            restrict: "E",
-            templateUrl: "/templates/settings-modifications.htm"
-        };
-    });
-
-    app.controller("ddsn", ["$scope", function($scope) {
+    app.controller("ddsn", ["$scope", ($scope) => {
         $scope.data = data;
 
         $scope.Math = Math;
 
-        $scope.checkPort = function(server) {
-            return server.settings.server.port === data.settings.addServer.server.port || server.settings.server.gamespyport === data.settings.addServer.server.port;
+        $scope.titleCase = (text) => {
+            return text.replace(/\w[\S\-]*/g, (match) => {
+                return match.charAt(0).toUpperCase() + match.substr(1).toLowerCase();
+            });
         };
 
-        $scope.checkGameSpyPort = function(server) {
-            return server.settings.server.gamespyport === data.settings.addServer.server.gamespyport || server.settings.server.port === data.settings.addServer.server.gamespyport;
-        };
-
-        $scope.getRegionName = function(regionId) {
+        $scope.getRegionName = (regionId) => {
             switch (regionId) {
                 case 0:
                     return "None";
@@ -321,27 +162,11 @@ var app = angular.module("ddsn", []),
             }
         };
 
-        $scope.getTeamArray = function(teams) {
-            var ret = [],
-                key;
-
-            for (key in teams) {
-                if (teams.hasOwnProperty(key)) {
-                    ret.push({
-                        teamName: key,
-                        points: teams[key]
-                    });
-                }
-            }
-
-            return ret;
-        };
-
-        $scope.getTimestamp = function(time) {
-            var seconds = time / 1000,
+        $scope.getTimestamp = (time) => {
+            var seconds = +(time / 1000).toFixed(2),
                 minutes, hours;
 
-            if (seconds <= 59.999) {
+            if (seconds <= 59.99) {
                 return seconds.toFixed(2);
             }
 
@@ -349,20 +174,20 @@ var app = angular.module("ddsn", []),
             seconds = seconds % 60;
 
             if (minutes < 60) {
-                return minutes.toString() + ":" + (seconds <= 9.999 ? "0" : "") + seconds.toFixed(2);
+                return minutes.toString() + ":" + (seconds <= 9.99 ? "0" : "") + seconds.toFixed(2);
             }
 
             hours = Math.floor(minutes / 60);
             minutes = minutes % 60;
 
-            return hours.toString() + ":" + (minutes < 10 ? "0" : "") + minutes.toString() + ":" + (seconds <= 9.999 ? "0" : "") + seconds.toFixed(2);
+            return hours.toString() + ":" + (minutes < 10 ? "0" : "") + minutes.toString() + ":" + (seconds <= 9.99 ? "0" : "") + seconds.toFixed(2);
         };
 
-        $scope.addServerServerRemoveTracker = function(index) {
+        $scope.addServerServerRemoveTracker = (index) => {
             data.settings.addServer.server.trackers.splice(index, 1);
         };
 
-        $scope.addServerServerAddTracker = function() {
+        $scope.addServerServerAddTracker = () => {
             data.settings.addServer.server.trackers.push({
                 region: data.settings.addServer.server.addTrackerRegion,
                 server: data.settings.addServer.server.addTrackerServer,
@@ -372,40 +197,39 @@ var app = angular.module("ddsn", []),
             data.settings.addServer.server.addTrackerPort = undefined;
         };
 
-        $scope.openMenu = function(screen) {
+        $scope.openMenu = (screen) => {
             data.serverTab = screen;
         };
 
-        $scope.openServer = function(port) {
-            getServer(port, function(server) {
-                var serverConsole;
+        $scope.openServer = (port) => {
+            var server = getServer(port),
+                serverConsole;
 
-                if (!server) {
-                    return;
-                }
+            if (!server) {
+                return;
+            }
 
-                data.serverTab = "server";
-                data.currentServer = server;
+            data.serverTab = "server";
+            data.currentServer = server;
 
-                scope.$evalAsync(function() {
-                    setTimeout(function() {
-                        serverConsole = $("#server-console");
-                        if (serverConsole.length > 0) {
-                            serverConsole[0].scrollTop = serverConsole[0].scrollHeight;
-                        }
-                    }, 0);
-                });
+            scope.$evalAsync(() => {
+                setTimeout(() => {
+                    serverConsole = $("#server-console");
+                    if (serverConsole.length > 0) {
+                        serverConsole[0].scrollTop = serverConsole[0].scrollHeight;
+                    }
+                }, 0);
             });
         };
 
-        $scope.openServerMenu = function(screen) {
+        $scope.openServerMenu = (screen) => {
             var serverConsole;
 
             data.serverMenuTab = screen;
 
             if (screen === "console") {
-                scope.$evalAsync(function() {
-                    setTimeout(function() {
+                scope.$evalAsync(() => {
+                    setTimeout(() => {
                         serverConsole = $("#server-console");
                         if (serverConsole.length > 0) {
                             serverConsole[0].scrollTop = serverConsole[0].scrollHeight;
@@ -415,47 +239,47 @@ var app = angular.module("ddsn", []),
             }
         };
 
-        $scope.openDashboard = function(screen) {
+        $scope.openDashboard = (screen) => {
             data.dashboardMenuTab = screen;
         };
 
-        $scope.openAddServer = function(screen) {
+        $scope.openAddServer = (screen) => {
             data.addServerMenuTab = screen;
         };
 
-        $scope.openSettings = function(screen) {
+        $scope.openSettings = (screen) => {
             data.settingsMenuTab = screen;
         };
 
-        $scope.updateAddServerServerPort = function() {
+        $scope.updateAddServerServerPort = () => {
             data.settings.addServer.server.portValid = typeof data.settings.addServer.server.port === "number" && data.settings.addServer.server.port >= 0 && data.settings.addServer.server.port <= 65535 && data.settings.addServer.server.port % 1 === 0;
             data.settings.addServer.server.portsDiffer = data.settings.addServer.server.port !== data.settings.addServer.server.gamespyport;
-            data.settings.addServer.server.portInUse = data.servers.filter($scope.checkPort).length > 0;
+            data.settings.addServer.server.portInUse = data.servers.filter(checkPort).length > 0;
         };
 
-        $scope.updateAddServerServerGamespyport = function() {
+        $scope.updateAddServerServerGamespyport = () => {
             data.settings.addServer.server.gamespyportValid = typeof data.settings.addServer.server.gamespyport === "number" && data.settings.addServer.server.gamespyport >= 0 && data.settings.addServer.server.gamespyport <= 65535 && data.settings.addServer.server.gamespyport % 1 === 0;
             data.settings.addServer.server.portsDiffer = data.settings.addServer.server.port !== data.settings.addServer.server.gamespyport;
-            data.settings.addServer.server.gamespyportInUse = data.servers.filter($scope.checkGameSpyPort).length > 0;
+            data.settings.addServer.server.gamespyportInUse = data.servers.filter(checkGameSpyPort).length > 0;
         };
 
-        $scope.updateAddServerServerFramerate = function() {
+        $scope.updateAddServerServerFramerate = () => {
             data.settings.addServer.server.framerateValid = typeof data.settings.addServer.server.framerate === "number" && data.settings.addServer.server.framerate >= 1 && data.settings.addServer.server.framerate <= 999 &&  data.settings.addServer.server.framerate % 1 === 0;
         };
 
-        $scope.updateAddServerServerTrackerRegion = function() {
+        $scope.updateAddServerServerTrackerRegion = () => {
             data.settings.addServer.server.addTrackerRegionValid = typeof data.settings.addServer.server.addTrackerRegion === "number" && data.settings.addServer.server.addTrackerRegion >= 0 && data.settings.addServer.server.addTrackerRegion <= 12 && data.settings.addServer.server.addTrackerRegion % 1 === 0;
         };
 
-        $scope.updateAddServerServerTrackerServer = function() {
+        $scope.updateAddServerServerTrackerServer = () => {
             data.settings.addServer.server.addTrackerServerValid = typeof data.settings.addServer.server.addTrackerServer === "string" && data.settings.addServer.server.addTrackerServer.length !== 0;
         };
 
-        $scope.updateAddServerServerTrackerPort = function() {
+        $scope.updateAddServerServerTrackerPort = () => {
             data.settings.addServer.server.addTrackerPortValid = typeof data.settings.addServer.server.addTrackerPort === "number" && data.settings.addServer.server.addTrackerPort >= 1 && data.settings.addServer.server.addTrackerPort <= 65535 && data.settings.addServer.server.addTrackerPort % 1 === 0;
         };
 
-        $scope.updateAddServerGameNetworkModel = function() {
+        $scope.updateAddServerGameNetworkModel = () => {
             switch (data.settings.addServer.game.networkModel) {
                 case "p2p":
                     data.settings.addServer.game.peer2peer = true;
@@ -472,43 +296,43 @@ var app = angular.module("ddsn", []),
             }
         };
 
-        $scope.updateAddServerGameMaxPlayers = function() {
+        $scope.updateAddServerGameMaxPlayers = () => {
             data.settings.addServer.game.maxPlayersValid = typeof data.settings.addServer.game.maxPlayers === "number" && data.settings.addServer.game.maxPlayers >= 1 && data.settings.addServer.game.maxPlayers <= 31 && data.settings.addServer.game.maxPlayers % 1 === 0;
         };
 
-        $scope.updateAddServerGamePps = function() {
+        $scope.updateAddServerGamePps = () => {
             data.settings.addServer.game.ppsValid = typeof data.settings.addServer.game.pps === "number" && data.settings.addServer.game.pps >= 1 && data.settings.addServer.game.pps <= 20 && data.settings.addServer.game.pps % 1 === 0;
         };
 
-        $scope.updateAddServerGameKillGoal = function() {
-            data.settings.addServer.game.killGoalValid = data.settings.addServer.game.killGoal === null || (typeof data.settings.addServer.game.killGoal === "number" && data.settings.addServer.game.killGoal >= 1 && data.settings.addServer.game.killGoal % 1 === 0);
+        $scope.updateAddServerGameKillGoal = () => {
+            data.settings.addServer.game.killGoalValid = data.settings.addServer.game.killGoal === null || typeof data.settings.addServer.game.killGoal === "number" && data.settings.addServer.game.killGoal >= 1 && data.settings.addServer.game.killGoal % 1 === 0;
         };
 
-        $scope.updateAddServerGameTimeLimit = function() {
-            data.settings.addServer.game.timeLimitValid = data.settings.addServer.game.timeLimit === null || (typeof data.settings.addServer.game.timeLimit === "number" && data.settings.addServer.game.timeLimit >= 1 && data.settings.addServer.game.timeLimit % 1 === 0);
+        $scope.updateAddServerGameTimeLimit = () => {
+            data.settings.addServer.game.timeLimitValid = data.settings.addServer.game.timeLimit === null || typeof data.settings.addServer.game.timeLimit === "number" && data.settings.addServer.game.timeLimit >= 1 && data.settings.addServer.game.timeLimit % 1 === 0;
         };
 
-        $scope.validModifications = function() {
-            return data.settings.modifications.filter(function(mod) {
+        $scope.validModifications = () => {
+            return data.settings.modifications.filter((mod) => {
                 return mod.valid;
             });
         };
 
-        $scope.missionSearch = function() {
+        $scope.missionSearch = () => {
             if (!data.settings.addServer.game.missionSearch || data.settings.addServer.game.missionSearch.length < 2) {
                 return;
             }
 
             var searchStrings = data.settings.addServer.game.missionSearch.toLowerCase().replace(/[^a-zA-Z0-9'\-\.]+/, " ").trim().split(" ");
 
-            data.missionsList = data.missions.filter(function(mission) {
+            data.missionsList = data.missions.filter((mission) => {
                 var index;
 
                 if (
-                    (data.settings.addServer.game.scriptName === 'ctf' && !mission.data.gameTypes.ctf) ||
-                    (data.settings.addServer.game.scriptName === 'entropy' && !mission.data.gameTypes.entropy) ||
-                    (data.settings.addServer.game.scriptName === 'hoard' && !mission.data.gameTypes.hoard) ||
-                    (data.settings.addServer.game.scriptName === 'monsterball' && !mission.data.gameTypes.monsterball)
+                    data.settings.addServer.game.scriptName === 'ctf' && !mission.data.gameTypes.ctf ||
+                    data.settings.addServer.game.scriptName === 'entropy' && !mission.data.gameTypes.entropy ||
+                    data.settings.addServer.game.scriptName === 'hoard' && !mission.data.gameTypes.hoard ||
+                    data.settings.addServer.game.scriptName === 'monsterball' && !mission.data.gameTypes.monsterball
                 ) {
                     return false;
                 }
@@ -524,21 +348,21 @@ var app = angular.module("ddsn", []),
             data.selectMissionToggle = true;
         };
 
-        $scope.refreshMissions = function() {
+        $scope.refreshMissions = () => {
             data.loadingMissions = true;
             ws.send(JSON.stringify({
                 message: "missions"
             }));
         };
 
-        $scope.selectMission = function(mission) {
+        $scope.selectMission = (mission) => {
             data.settings.addServer.game.selectedMission = mission;
             data.settings.addServer.game.missionName = mission.shortFilename;
             data.selectMissionToggle = false;
             data.settings.addServer.game.setLevel = 1;
         };
 
-        $scope.updateAddServerGameTeamName = function(teamNum) {
+        $scope.updateAddServerGameTeamName = (teamNum) => {
             if (data.settings.addServer.game.setTeamName[teamNum].length === 0) {
                 switch (teamNum) {
                     case 0:
@@ -557,19 +381,19 @@ var app = angular.module("ddsn", []),
             }
         };
 
-        $scope.updateAddServerGameRespawnTime = function() {
-            data.settings.addServer.game.respawnTimeValid = data.settings.addServer.game.respawnTime === null || (typeof data.settings.addServer.game.respawnTime === "number" && data.settings.addServer.game.respawnTime >= 1 && data.settings.addServer.game.respawnTime % 1 === 0);
+        $scope.updateAddServerGameRespawnTime = () => {
+            data.settings.addServer.game.respawnTimeValid = data.settings.addServer.game.respawnTime === null || typeof data.settings.addServer.game.respawnTime === "number" && data.settings.addServer.game.respawnTime >= 1 && data.settings.addServer.game.respawnTime % 1 === 0;
         };
 
-        $scope.updateAddServerGameAudioTauntDelay = function() {
-            data.settings.addServer.game.audioTauntDelayValid = data.settings.addServer.game.audioTauntDelay === null || (typeof data.settings.addServer.game.audioTauntDelay === "number" && data.settings.addServer.game.audioTauntDelay >= 1 && data.settings.addServer.game.audioTauntDelay % 1 === 0);
+        $scope.updateAddServerGameAudioTauntDelay = () => {
+            data.settings.addServer.game.audioTauntDelayValid = data.settings.addServer.game.audioTauntDelay === null || typeof data.settings.addServer.game.audioTauntDelay === "number" && data.settings.addServer.game.audioTauntDelay >= 1 && data.settings.addServer.game.audioTauntDelay % 1 === 0;
         };
 
-        $scope.updateAddServerAllowedShips = function() {
+        $scope.updateAddServerAllowedShips = () => {
             data.settings.addServer.allowed.shipsValid = data.settings.addServer.allowed.ships.blackpyro || data.settings.addServer.allowed.ships.magnumaht || data.settings.addServer.allowed.ships.phoenix || data.settings.addServer.allowed.ships.pyrogl;
         };
 
-        $scope.deleteSavedServer = function(server) {
+        $scope.deleteSavedServer = (server) => {
             data.settings.savedServers.splice(data.settings.savedServers.indexOf(server), 1);
 
             ws.send(JSON.stringify({
@@ -578,17 +402,17 @@ var app = angular.module("ddsn", []),
             }));
         };
 
-        $scope.quickLaunchServer = function(server) {
+        $scope.quickLaunchServer = (server) => {
             data.settings.addServer = JSON.parse(JSON.stringify(server));
 
             data.settings.addServer.server.port = 2092;
             data.settings.addServer.server.gamespyport = 20143;
 
-            while (data.servers.filter($scope.checkPort).length > 0) {
+            while (data.servers.filter(checkPort).length > 0) {
                 data.settings.addServer.server.port++;
             }
 
-            while (data.servers.filter($scope.checkGameSpyPort).length > 0) {
+            while (data.servers.filter(checkGameSpyPort).length > 0) {
                 data.settings.addServer.server.gamespyport++;
             }
 
@@ -597,17 +421,17 @@ var app = angular.module("ddsn", []),
             $scope.launchServer();
         };
 
-        $scope.loadSavedServer = function(server) {
+        $scope.loadSavedServer = (server) => {
             data.settings.addServer = JSON.parse(JSON.stringify(server));
 
             data.settings.addServer.server.port = 2092;
             data.settings.addServer.server.gamespyport = 20143;
 
-            while (data.servers.filter($scope.checkPort).length > 0) {
+            while (data.servers.filter(checkPort).length > 0) {
                 data.settings.addServer.server.port++;
             }
 
-            while (data.servers.filter($scope.checkGameSpyPort).length > 0) {
+            while (data.servers.filter(checkGameSpyPort).length > 0) {
                 data.settings.addServer.server.gamespyport++;
             }
 
@@ -616,7 +440,7 @@ var app = angular.module("ddsn", []),
             $scope.openAddServer("server");
         };
 
-        $scope.launchServer = function() {
+        $scope.launchServer = () => {
             var server, savedServer;
 
             data.settings.addServer.server.directory = data.settings.descent3.path;
@@ -638,7 +462,7 @@ var app = angular.module("ddsn", []),
 
             data.servers.push(server);
 
-            data.servers.sort(function(a, b) {
+            data.servers.sort((a, b) => {
                 return a.settings.server.port > b.settings.server.port ? 1 : -1;
             });
 
@@ -648,7 +472,7 @@ var app = angular.module("ddsn", []),
             data.addServerMenuTab = "saved";
 
             if (data.settings.addServer.saveServerName) {
-                savedServer = data.settings.savedServers.filter(function(server) {
+                savedServer = data.settings.savedServers.filter((server) => {
                     return server.saveServerName === data.settings.addServer.saveServerName;
                 });
 
@@ -658,23 +482,23 @@ var app = angular.module("ddsn", []),
 
                 data.settings.savedServers.push(JSON.parse(JSON.stringify(data.settings.addServer)));
 
-                data.settings.savedServers.sort(function(a, b) {
+                data.settings.savedServers.sort((a, b) => {
                     return a.saveServerName.localeCompare(b.saveServerName);
                 });
             }
 
             data.settings.addServer = JSON.parse(JSON.stringify(data.settings.default));
 
-            while (data.servers.filter($scope.checkPort).length > 0) {
+            while (data.servers.filter(checkPort).length > 0) {
                 data.settings.addServer.server.port++;
             }
 
-            while (data.servers.filter($scope.checkGameSpyPort).length > 0) {
+            while (data.servers.filter(checkGameSpyPort).length > 0) {
                 data.settings.addServer.server.gamespyport++;
             }
         };
 
-        $scope.updateSettingsDescent3Path = function() {
+        $scope.updateSettingsDescent3Path = () => {
             ws.send(JSON.stringify({
                 message: "settings.descent3.path",
                 path: data.settings.descent3.path
@@ -682,51 +506,43 @@ var app = angular.module("ddsn", []),
         };
     }]);
 
-    $(document).ready(function() {
-        var createWebsocketClient = function() {
+    $(document).ready(() => {
+        var createWebsocketClient = () => {
             var connected = false;
             ws = new WebSocket("ws://localhost:20921");
 
-            ws.onopen = function() {
+            ws.onopen = () => {
                 ws.send(JSON.stringify({
                     message: "initialize"
                 }));
                 connected = true;
             };
 
-            ws.onclose = function() {
+            ws.onclose = () => {
                 if (connected) {
                     // If the server shut down, attempt to reconnect once.
-                    setTimeout(function() {
-                        createWebsocketClient();
-                    }, 1000);
+                    setTimeout(createWebsocketClient, 1000);
                 } else {
                     data.offline = true;
                     scope.$apply();
                 }
             };
 
-            ws.onmessage = function(ev) {
+            ws.onmessage = (ev) => {
                 var message = JSON.parse(ev.data),
 
-                    getPlayerNum = function(server, player) {
-                        return server.playerNames[player];
-                    },
-
-                    getTeamNum = function(server, team) {
-                        return server.settings.game.setTeamName.indexOf(team);
-                    };
+                    server, killerNum, killedNum, playerNum, oldPlayerNum, key, serverConsole, scroll, teamNum;
 
                 switch (message.message) {
                     case "initservers":
                         data.servers = message.servers;
 
                         if (data.settings.addServer) {
-                            while (data.servers.filter(scope.checkPort).length > 0) {
+                            while (data.servers.filter(checkPort).length > 0) {
                                 data.settings.addServer.server.port++;
                             }
 
-                            while (data.servers.filter(scope.checkGameSpyPort).length > 0) {
+                            while (data.servers.filter(checkGameSpyPort).length > 0) {
                                 data.settings.addServer.server.gamespyport++;
                             }
                         }
@@ -743,449 +559,436 @@ var app = angular.module("ddsn", []),
                         scope.$apply();
                         break;
                     case "server.close":
-                        getServer(message.port, function(server) {
-                            if (!server) {
-                                return;
+                        server = getServer(message.port);
+
+                        if (!server) {
+                            return;
+                        }
+
+                        if (data.currentServer && data.currentServer.settings.server.port === message.port) {
+                            data.currentServer = null;
+                            if (data.serverTab === "server") {
+                                data.serverTab = "dashboard";
                             }
+                        }
 
-                            if (data.currentServer && data.currentServer.settings.server.port === message.port) {
-                                data.currentServer = null;
-                                if (data.serverTab === "server") {
-                                    data.serverTab = "dashboard";
-                                }
-                            }
+                        data.servers.splice(data.servers.indexOf(server), 1);
+                        server = null;
 
-                            data.servers.splice(data.servers.indexOf(server), 1);
-                            server = null;
+                        scope.updateAddServerServerPort();
+                        scope.updateAddServerServerGamespyport();
 
-                            scope.updateAddServerServerPort();
-                            scope.updateAddServerServerGamespyport();
+                        // TODO: Notification that the server was closed.
 
-                            // TODO: Notification that the server was closed.
-
-                            scope.$apply();
-                        });
+                        scope.$apply();
                         break;
                     case "server.connected":
-                        getServer(message.port, function(server) {
-                            if (!server) {
-                                return;
-                            }
+                        server = getServer(message.port);
 
-                            server.loading = false;
-                            server.startTime = new Date().getTime();
+                        if (!server) {
+                            return;
+                        }
 
-                            scope.$apply();
-                        });
+                        server.loading = false;
+                        server.startTime = new Date().getTime();
+
+                        scope.$apply();
                         break;
                     case "server.event":
-                        getServer(message.port, function(server) {
-                            var killerNum, killedNum, playerNum;
+                        server = getServer(message.port);
 
-                            if (!server) {
-                                return;
-                            }
+                        if (!server) {
+                            return;
+                        }
 
-                            switch (message.event.event) {
-                                case "kill":
-                                    killerNum = getPlayerNum(server, message.event.killer);
-                                    killedNum = getPlayerNum(server, message.event.killed);
+                        switch (message.event.event) {
+                            case "kill":
+                                killerNum = getPlayerNum(server, message.event.killer);
+                                killedNum = getPlayerNum(server, message.event.killed);
 
-                                    if (killerNum) {
-                                        server.players[killerNum].connected = true;
-                                        if (!server.players[killerNum].opponents[message.event.killed]) {
-                                            server.players[killerNum].opponents[message.event.killed] = {
-                                                kills: 0,
-                                                deaths: 0
-                                            };
-                                        }
-                                        server.players[killerNum].opponents[message.event.killed].kills++;
-                                        server.players[killerNum].kills++;
+                                if (killerNum) {
+                                    server.players[killerNum].connected = true;
+                                    if (!server.players[killerNum].opponents[message.event.killed]) {
+                                        server.players[killerNum].opponents[message.event.killed] = {
+                                            kills: 0,
+                                            deaths: 0
+                                        };
                                     }
-
-                                    if (killedNum) {
-                                        server.players[killedNum].connected = true;
-                                        if (!server.players[killedNum].opponents[message.event.killer]) {
-                                            server.players[killedNum].opponents[message.event.killer] = {
-                                                kills: 0,
-                                                deaths: 0
-                                            };
-                                        }
-                                        server.players[killedNum].opponents[message.event.killer].deaths++;
-                                        server.players[killedNum].deaths++;
-                                        server.players[killedNum].flags = [];
-                                    }
-
-                                    break;
-                                case "suicide":
-                                    playerNum = getPlayerNum(server, message.event.player);
-
-                                    if (playerNum) {
-                                        server.players[playerNum].connected = true;
-                                        server.players[playerNum].suicides++;
-                                        server.players[playerNum].flags = [];
-                                    }
-
-                                    break;
-                                case "death":
-                                    playerNum = getPlayerNum(server, message.event.player);
-
-                                    if (playerNum) {
-                                        server.players[playerNum].connected = true;
-                                        server.players[playerNum].deaths++;
-                                        server.players[playerNum].flags = [];
-                                    }
-
-                                    break;
-                                case "robotdeath":
-                                    playerNum = getPlayerNum(server, message.event.player);
-
-                                    if (playerNum) {
-                                        server.players[playerNum].deaths++;
-                                    }
-
-                                    break;
-                                case "monsterballblunder":
-                                    playerNum = getPlayerNum(server, message.event.player);
-
-                                    if (playerNum) {
-                                        server.players[playerNum].blunders++;
-                                    }
-
-                                    break;
-                                case "flagpickup":
-                                    playerNum = getPlayerNum(server, message.event.player);
-
-                                    if (playerNum) {
-                                        server.players[playerNum].flags.push(message.event.flag);
-                                    }
-
-                                    break;
-                                case "flagscore":
-                                    playerNum = getPlayerNum(server, message.event.player);
-
-                                    if (playerNum) {
-                                        server.players[playerNum].connected = true;
-                                        server.players[playerNum].flags = [];
-                                    }
-
-                                    break;
-                                case "hyperorb":
-                                    playerNum = getPlayerNum(server, message.event.player);
-
-                                    if (playerNum) {
-                                        server.players[playerNum].hyperorb = true;
-                                    }
-
-                                    break;
-                                case "hyperorblost":
-                                    playerNum = getPlayerNum(server, message.event.player);
-
-                                    if (playerNum) {
-                                        server.players[playerNum].hyperorb = false;
-                                    }
-
-                                    break;
-                                case "left":
-                                case "disconnected":
-                                    playerNum = getPlayerNum(server, message.event.player);
-
-                                    if (playerNum) {
-                                        server.players[playerNum].connected = false;
-                                        server.players[playerNum].timeInGame = message.event.connected;
-                                        server.players[playerNum].hyperorb = false;
-                                        server.players[playerNum].flags = [];
-                                    }
-
-                                    break;
-                                case "observing":
-                                    playerNum = getPlayerNum(server, message.event.player);
-
-                                    if (playerNum) {
-                                        server.players[playerNum].connected = true;
-                                        server.players[playerNum].observing = true;
-                                        server.players[playerNum].hyperorb = false;
-                                        server.players[playerNum].flags = [];
-                                    }
-
-                                    break;
-                                case "unobserving":
-                                    playerNum = getPlayerNum(server, message.event.player);
-
-                                    if (playerNum) {
-                                        server.players[playerNum].connected = true;
-                                        server.players[playerNum].observing = false;
-                                    }
-
-                                    break;
-                                case "teamchange":
-                                    playerNum = getPlayerNum(server, message.event.player);
-
-                                    if (playerNum) {
-                                        server.players[playerNum].connected = true;
-                                        server.players[playerNum].teamName = message.event.team;
-                                        server.players[playerNum].flags = [];
-                                    }
-
-                                    break;
-                                case "endlevel":
-                                    message.event.times.forEach(function(time, index) {
-                                        server.players[index].timeInGame = time;
-                                    });
-
-                                    break;
-                                case "startlevel":
-                                    server.startTime = new Date().getTime();
-                                    server.endTime = undefined;
-                                    server.console = [];
-                                    server.events = [];
-                                    server.players = [];
-                                    server.teams = [];
-                                    server.playerNames = {};
-                                    server.logs.push(message.event.log);
-                                    break;
-                            }
-
-                            server.events.push(message.event);
-
-                            scope.$apply();
-                        });
-                        break;
-                    case "server.monsterballscore":
-                        getServer(message.port, function(server) {
-                            if (!server) {
-                                return;
-                            }
-
-                            var playerNum = getPlayerNum(server, message.player);
-
-                            if (playerNum) {
-                                server.players[playerNum].points = message.points;
-                                server.players[playerNum].ping = message.ping;
-                            }
-
-                            scope.$apply();
-                        });
-                        break;
-                    case "server.player":
-                        getServer(message.port, function(server) {
-                            if (!server) {
-                                return;
-                            }
-
-                            var oldPlayerNum = getPlayerNum(server, message.name);
-
-                            if (oldPlayerNum === message.playerNum) {
-                                server.players[message.playerNum].connected = true;
-
-                                return;
-                            }
-
-                            if (oldPlayerNum) {
-                                server.players[message.playerNum] = server.players[oldPlayerNum];
-                                server.players[oldPlayerNum] = null;
-                            } else {
-                                server.players[message.playerNum] = {
-                                    name: message.name,
-                                    connected: true,
-                                    opponents: {},
-                                    flags: [],
-                                    kills: 0,
-                                    deaths: 0,
-                                    suicides: 0,
-                                    points: 0,
-                                    blunders: 0
-                                };
-                            }
-                            server.playerNames[message.name] = message.playerNum;
-
-                            scope.$apply();
-                        });
-                        break;
-                    case "server.playerinfo":
-                        getServer(message.port, function(server) {
-                            if (!server) {
-                                return;
-                            }
-
-                            var key;
-
-                            if (message.info.player) {
-                                server.lastPlayerNum = getPlayerNum(server, message.info.player);
-                            }
-
-                            for (key in message.info) {
-                                if (message.info.hasOwnProperty(key)) {
-                                    switch (key) {
-                                        case "team":
-                                            server.players[server.lastPlayerNum].teamName = message.info[key];
-                                            break;
-                                        case "totalTimeInGame":
-                                            server.players[server.lastPlayerNum].startTime = new Date().getTime() - (message.info[key] * 1000);
-                                            break;
-                                        default:
-                                            server.players[server.lastPlayerNum][key] = message.info[key];
-                                            break;
-                                    }
-                                }
-                            }
-
-                            scope.$apply();
-                        });
-                        break;
-                    case "server.playerscore":
-                        getServer(message.port, function(server) {
-                            if (!server) {
-                                return;
-                            }
-
-                            var playerNum = getPlayerNum(server, message.player);
-
-                            if (playerNum) {
-                                server.players[playerNum].points = message.points;
-                                server.players[playerNum].ping = message.ping;
-                            }
-
-                            scope.$apply();
-                        });
-                        break;
-                    case "server.raw":
-                        getServer(message.port, function(server) {
-                            var serverConsole,
-                                scroll;
-
-                            if (!server) {
-                                return;
-                            }
-
-                            serverConsole = $("#server-console");
-
-                            server.console.push(message.data);
-
-                            scroll = serverConsole.length > 0 && serverConsole[0].scrollTop + serverConsole.innerHeight() === serverConsole[0].scrollHeight;
-
-                            scope.$apply();
-
-                            scope.$evalAsync(
-                                function() {
-                                    if (scroll) {
-                                        setTimeout(function() {
-                                            serverConsole[0].scrollTop = serverConsole[0].scrollHeight;
-                                        }, 0);
-                                    }
-                                }
-                            );
-                        });
-                        break;
-                    case "server.teamplayerscore":
-                        getServer(message.port, function(server) {
-                            if (!server) {
-                                return;
-                            }
-
-                            var playerNum = getPlayerNum(server, message.player);
-
-                            if (playerNum) {
-                                server.players[playerNum].teamName = message.teamName;
-                                server.players[playerNum].points = message.points;
-                                server.players[playerNum].ping = message.ping;
-                            }
-
-                            scope.$apply();
-                        });
-                        break;
-                    case "server.teamscore":
-                        getServer(message.port, function(server) {
-                            var teamNum;
-
-                            if (!server) {
-                                return;
-                            }
-
-                            teamNum = getTeamNum(server, message.teamName);
-
-                            if (teamNum || teamNum === 0) {
-                                if (!server.teams[teamNum]) {
-                                    server.teams[teamNum] = {
-                                        teamName: message.teamName
-                                    };
-                                }
-                                server.teams[teamNum].points = message.score;
-                            }
-
-                            scope.$apply();
-                        });
-                        break;
-                    case "server.timeleft":
-                        getServer(message.port, function(server) {
-                            if (!server) {
-                                return;
-                            }
-
-                            server.endTime = new Date().getTime() + message.timeLeft * 1000;
-
-                            scope.$apply();
-                        });
-                        break;
-                    case "settings":
-                        (function() {
-                            var key;
-
-                            for (key in message.settings) {
-                                if (message.settings.hasOwnProperty(key)) {
-                                    data.settings[key] = message.settings[key];
-                                }
-                            }
-
-                            if (data.servers) {
-                                while (data.servers.filter(scope.checkPort).length > 0) {
-                                    data.settings.addServer.server.port++;
+                                    server.players[killerNum].opponents[message.event.killed].kills++;
+                                    server.players[killerNum].kills++;
                                 }
 
-                                while (data.servers.filter(scope.checkGameSpyPort).length > 0) {
-                                    data.settings.addServer.server.gamespyport++;
+                                if (killedNum) {
+                                    server.players[killedNum].connected = true;
+                                    if (!server.players[killedNum].opponents[message.event.killer]) {
+                                        server.players[killedNum].opponents[message.event.killer] = {
+                                            kills: 0,
+                                            deaths: 0
+                                        };
+                                    }
+                                    server.players[killedNum].opponents[message.event.killer].deaths++;
+                                    server.players[killedNum].deaths++;
+                                    server.players[killedNum].flags = [];
                                 }
-                            }
 
-                            if (data.settings.modifications) {
-                                data.settings.modifications.forEach(function(mod) {
-                                    var fx;
+                                break;
+                            case "suicide":
+                                playerNum = getPlayerNum(server, message.event.player);
 
-                                    try {
-                                        fx = new Function("return " + mod.code);
-                                        mod.codeValid = true;
-                                        mod.valid = true;
-                                    } catch (ex) {
-                                        mod.codeValid = false;
-                                        mod.valid = false;
-                                    }
+                                if (playerNum) {
+                                    server.players[playerNum].connected = true;
+                                    server.players[playerNum].suicides++;
+                                    server.players[playerNum].flags = [];
+                                }
 
-                                    if (mod.options) {
-                                        mod.options.forEach(function(option) {
-                                            if (option.validations) {
-                                                option.validations.forEach(function(validation) {
-                                                    var fx;
-                                                    try {
-                                                        fx = new Function("return " + validation.code);
-                                                        validation.fx = fx();
-                                                        validation.valid = true;
-                                                    } catch (ex) {
-                                                        validation.valid = false;
-                                                        mod.valid = false;
-                                                    }
-                                                });
-                                            }
-                                        });
-                                    }
+                                break;
+                            case "death":
+                                playerNum = getPlayerNum(server, message.event.player);
+
+                                if (playerNum) {
+                                    server.players[playerNum].connected = true;
+                                    server.players[playerNum].deaths++;
+                                    server.players[playerNum].flags = [];
+                                }
+
+                                break;
+                            case "robotdeath":
+                                playerNum = getPlayerNum(server, message.event.player);
+
+                                if (playerNum) {
+                                    server.players[playerNum].deaths++;
+                                }
+
+                                break;
+                            case "monsterballblunder":
+                                playerNum = getPlayerNum(server, message.event.player);
+
+                                if (playerNum) {
+                                    server.players[playerNum].blunders++;
+                                }
+
+                                break;
+                            case "flagpickup":
+                                playerNum = getPlayerNum(server, message.event.player);
+
+                                if (playerNum) {
+                                    server.players[playerNum].flags.push(message.event.flag);
+                                }
+
+                                break;
+                            case "flagscore":
+                                playerNum = getPlayerNum(server, message.event.player);
+
+                                if (playerNum) {
+                                    server.players[playerNum].connected = true;
+                                    server.players[playerNum].flags = [];
+                                }
+
+                                break;
+                            case "hyperorb":
+                                playerNum = getPlayerNum(server, message.event.player);
+
+                                if (playerNum) {
+                                    server.players[playerNum].hyperorb = true;
+                                }
+
+                                break;
+                            case "hyperorblost":
+                                playerNum = getPlayerNum(server, message.event.player);
+
+                                if (playerNum) {
+                                    server.players[playerNum].hyperorb = false;
+                                }
+
+                                break;
+                            case "left":
+                            case "disconnected":
+                                playerNum = getPlayerNum(server, message.event.player);
+
+                                if (playerNum) {
+                                    server.players[playerNum].connected = false;
+                                    server.players[playerNum].timeInGame = message.event.connected;
+                                    server.players[playerNum].hyperorb = false;
+                                    server.players[playerNum].flags = [];
+                                }
+
+                                break;
+                            case "observing":
+                                playerNum = getPlayerNum(server, message.event.player);
+
+                                if (playerNum) {
+                                    server.players[playerNum].connected = true;
+                                    server.players[playerNum].observing = true;
+                                    server.players[playerNum].hyperorb = false;
+                                    server.players[playerNum].flags = [];
+                                }
+
+                                break;
+                            case "unobserving":
+                                playerNum = getPlayerNum(server, message.event.player);
+
+                                if (playerNum) {
+                                    server.players[playerNum].connected = true;
+                                    server.players[playerNum].observing = false;
+                                }
+
+                                break;
+                            case "teamchange":
+                                playerNum = getPlayerNum(server, message.event.player);
+
+                                if (playerNum) {
+                                    server.players[playerNum].connected = true;
+                                    server.players[playerNum].teamName = message.event.team;
+                                    server.players[playerNum].flags = [];
+                                }
+
+                                break;
+                            case "endlevel":
+                                message.event.times.forEach((time, index) => {
+                                    server.players[index].timeInGame = time;
                                 });
 
-                                if (scope.validModifications().length > 0) {
-                                    data.currentAddServerMod = scope.validModifications()[0];
+                                break;
+                            case "startlevel":
+                                server.startTime = new Date().getTime();
+                                server.endTime = undefined;
+                                server.console = [];
+                                server.events = [];
+                                server.players = [];
+                                server.teams = [];
+                                server.playerNames = {};
+                                server.logs.push(message.event.log);
+                                break;
+                        }
+
+                        server.events.push(message.event);
+
+                        scope.$apply();
+                        break;
+                    case "server.monsterballscore":
+                        server = getServer(message.port);
+
+                        if (!server) {
+                            return;
+                        }
+
+                        playerNum = getPlayerNum(server, message.player);
+
+                        if (playerNum) {
+                            server.players[playerNum].points = message.points;
+                            server.players[playerNum].ping = message.ping;
+                        }
+
+                        scope.$apply();
+                        break;
+                    case "server.player":
+                        server = getServer(message.port);
+
+                        if (!server) {
+                            return;
+                        }
+
+                        oldPlayerNum = getPlayerNum(server, message.name);
+
+                        if (oldPlayerNum === message.playerNum) {
+                            server.players[message.playerNum].connected = true;
+
+                            return;
+                        }
+
+                        if (oldPlayerNum) {
+                            server.players[message.playerNum] = server.players[oldPlayerNum];
+                            server.players[oldPlayerNum] = null;
+                        } else {
+                            server.players[message.playerNum] = {
+                                name: message.name,
+                                connected: true,
+                                opponents: {},
+                                flags: [],
+                                kills: 0,
+                                deaths: 0,
+                                suicides: 0,
+                                points: 0,
+                                blunders: 0
+                            };
+                        }
+                        server.playerNames[message.name] = message.playerNum;
+
+                        scope.$apply();
+                        break;
+                    case "server.playerinfo":
+                        server = getServer(message.port);
+
+                        if (!server) {
+                            return;
+                        }
+
+                        if (message.info.player) {
+                            server.lastPlayerNum = getPlayerNum(server, message.info.player);
+                        }
+
+                        for (key in message.info) {
+                            if (message.info.hasOwnProperty(key)) {
+                                switch (key) {
+                                    case "team":
+                                        server.players[server.lastPlayerNum].teamName = message.info[key];
+                                        break;
+                                    case "totalTimeInGame":
+                                        server.players[server.lastPlayerNum].startTime = new Date().getTime() - message.info[key] * 1000;
+                                        break;
+                                    default:
+                                        server.players[server.lastPlayerNum][key] = message.info[key];
+                                        break;
                                 }
                             }
+                        }
 
-                            scope.$apply();
-                        }());
+                        scope.$apply();
+                        break;
+                    case "server.playerscore":
+                        server = getServer(message.port);
+
+                        if (!server) {
+                            return;
+                        }
+
+                        playerNum = getPlayerNum(server, message.player);
+
+                        if (playerNum) {
+                            server.players[playerNum].points = message.points;
+                            server.players[playerNum].ping = message.ping;
+                        }
+
+                        scope.$apply();
+                        break;
+                    case "server.raw":
+                        server = getServer(message.port);
+
+                        if (!server) {
+                            return;
+                        }
+
+                        serverConsole = $("#server-console");
+
+                        server.console.push(message.data);
+
+                        scroll = serverConsole.length > 0 && serverConsole[0].scrollTop + serverConsole.innerHeight() === serverConsole[0].scrollHeight;
+
+                        scope.$apply();
+
+                        scope.$evalAsync(
+                            () => {
+                                if (scroll) {
+                                    setTimeout(() => {
+                                        serverConsole[0].scrollTop = serverConsole[0].scrollHeight;
+                                    }, 0);
+                                }
+                            }
+                        );
+                        break;
+                    case "server.teamplayerscore":
+                        server = getServer(message.port);
+
+                        if (!server) {
+                            return;
+                        }
+
+                        playerNum = getPlayerNum(server, message.player);
+
+                        if (playerNum) {
+                            server.players[playerNum].teamName = message.teamName;
+                            server.players[playerNum].points = message.points;
+                            server.players[playerNum].ping = message.ping;
+                        }
+
+                        scope.$apply();
+                        break;
+                    case "server.teamscore":
+                        server = getServer(message.port);
+
+                        if (!server) {
+                            return;
+                        }
+
+                        teamNum = getTeamNum(server, message.teamName);
+
+                        if (teamNum || teamNum === 0) {
+                            if (!server.teams[teamNum]) {
+                                server.teams[teamNum] = {
+                                    teamName: message.teamName
+                                };
+                            }
+                            server.teams[teamNum].points = message.score;
+                        }
+
+                        scope.$apply();
+                        break;
+                    case "server.timeleft":
+                        server = getServer(message.port);
+
+                        if (!server) {
+                            return;
+                        }
+
+                        server.endTime = new Date().getTime() + message.timeLeft * 1000;
+
+                        scope.$apply();
+                        break;
+                    case "settings":
+                        for (key in message.settings) {
+                            if (message.settings.hasOwnProperty(key)) {
+                                data.settings[key] = message.settings[key];
+                            }
+                        }
+
+                        if (data.servers) {
+                            while (data.servers.filter(checkPort).length > 0) {
+                                data.settings.addServer.server.port++;
+                            }
+
+                            while (data.servers.filter(checkGameSpyPort).length > 0) {
+                                data.settings.addServer.server.gamespyport++;
+                            }
+                        }
+
+                        if (data.settings.modifications) {
+                            data.settings.modifications.forEach((mod) => {
+                                var fx;
+
+                                try {
+                                    fx = new Function("return " + mod.code);
+                                    mod.codeValid = true;
+                                    mod.valid = true;
+                                } catch (ex) {
+                                    mod.codeValid = false;
+                                    mod.valid = false;
+                                }
+
+                                if (mod.options) {
+                                    mod.options.forEach((option) => {
+                                        if (option.validations) {
+                                            option.validations.forEach((validation) => {
+                                                var fx;
+                                                try {
+                                                    fx = new Function("return " + validation.code);
+                                                    validation.fx = fx();
+                                                    validation.valid = true;
+                                                } catch (ex) {
+                                                    validation.valid = false;
+                                                    mod.valid = false;
+                                                }
+                                            });
+                                        }
+                                    });
+                                }
+                            });
+
+                            if (scope.validModifications().length > 0) {
+                                data.currentAddServerMod = scope.validModifications()[0];
+                            }
+                        }
+
+                        scope.$apply();
                         break;
                     case "settings.descent3.pathValid":
                         data.settings.descent3.pathValid = message.valid;
@@ -1204,4 +1007,4 @@ var app = angular.module("ddsn", []),
         scope = angular.element("html").scope();
         createWebsocketClient();
     });
-}());
+})();

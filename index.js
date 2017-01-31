@@ -1,84 +1,25 @@
-var cluster = require("cluster"),
-    webserver = require("./webserver"),
-    websocket = require("./websocket"),
-    webServerWorker, webSocketWorker;
+var express = require("express"),
+    app = express(),
+    server;
 
-// A safe regexp exec method that does not leak memory.
-RegExp.prototype.safeexec = function(string) {
-    "use strict";
-
-    var result = this.exec(string);
-
-    if (result) {
-        result.forEach(function(item, index) {
-            if (typeof item === "string") {
-                result[index] = item.split("").join("");
-            } else {
-                result[index] = undefined;
-            }
-        });
+// Only allow connections on the localhost.
+app.use(function(req, res, next) {
+    if (req.headers.host === "localhost:20920") {
+        next();
+    } else {
+        res.status(404).send("Not found");
     }
+});
 
-    return result;
-};
+// Allow for static content in the public directory.
+app.use(express.static("public", {index: "index.htm"}));
 
-// Use clustering to spawn separate processes.
-if (cluster.isMaster) {
-    webServerWorker = cluster.fork({
-        ddsnJob: "webserver"
-    });
-    webSocketWorker = cluster.fork({
-        ddsnJob: "websocket"
-    });
+// Force quit Descent DSN entirely.
+app.get("/quit", function(req, res) {
+    res.status(200).send("Descent DSN has been force quit.  You should close all other running Descent 3 servers manually.");
+    server.close();
+});
 
-    cluster.on("disconnect", function(worker) {
-        "use strict";
-
-        if (worker.suicide) {
-            // Worker was intentionally disconnected, end the application.
-            if (webServerWorker.isConnected()) {
-                webServerWorker.kill();
-            }
-            if (webSocketWorker.isConnected()) {
-                webSocketWorker.kill();
-            }
-            process.exit();
-        } else {
-            // Worker was unintentionally disconnected, restart any disconnected workers.
-            if (!webServerWorker.isConnected()) {
-                webServerWorker = cluster.fork({
-                    ddsnJob: "webserver"
-                });
-            }
-            if (!webSocketWorker.isConnected()) {
-                webSocketWorker = cluster.fork({
-                    ddsnJob: "websocket"
-                });
-            }
-        }
-    });
-
-    cluster.on("exit", function() {
-        "use strict";
-
-        if (!webServerWorker.isConnected()) {
-            webServerWorker = cluster.fork({
-                ddsnJob: "webserver"
-            });
-        }
-        if (!webSocketWorker.isConnected()) {
-            webSocketWorker = cluster.fork({
-                ddsnJob: "websocket"
-            });
-        }
-    });
-} else {
-    switch (process.env.ddsnJob) {
-        case "webserver":
-            webserver();
-            break;
-        case "websocket":
-            websocket();
-            break;
-    }
-}
+// Create the server.
+server = app.listen(20920);
+console.log("Listening on port 20920.");

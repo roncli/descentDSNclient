@@ -7,13 +7,13 @@
         <div class="input-group">
             <span class="input-group-addon" style="white-space: nowrap; width: 1px;">Connection type:</span>
             <span class="input-group-addon" style="width: 100%; padding: 0;">
-                <select class="form-control" ng-model="data.settings.addServer.game.connectionName" ng-options="connectionType.name as connectionType.titleName for connectionType in data.settings.connectionTypes"></select>
+                <select class="form-control" ng-model="data.settings.addServer.game.connectionName" ng-options="connectionType as titleCase(connectionType) for connectionType in data.settings.connectionTypes"></select>
             </span>
         </div>
         <div class="input-group">
             <span class="input-group-addon" style="white-space: nowrap; width: 1px;">Game type:</span>
             <span class="input-group-addon" style="width: 100%; padding: 0;">
-                <select class="form-control" ng-model="data.settings.addServer.game.scriptName" ng-options="gameType.name as gameType.titleName for gameType in data.settings.gameTypes" ng-change="missionSearch()"></select>
+                <select class="form-control" ng-model="data.settings.addServer.game.scriptName" ng-options="gameType as titleCase(gameType) for gameType in data.settings.gameTypes" ng-change="missionSearch()"></select>
             </span>
         </div>
         <div class="input-group">
@@ -93,6 +93,7 @@
             <select class="form-control" ng-model="data.settings.addServer.game.setLevel" ng-options="(data.settings.addServer.game.selectedMission.data.levels.indexOf(level) + 1) as ((data.settings.addServer.game.selectedMission.data.levels.indexOf(level) + 1).toString() + ') ' + (level.name || level.mine)) for level in data.settings.addServer.game.selectedMission.data.levels"></select>
         </span>
     </div>
+    <br ng-if="data.missionsList && data.missionsList.length > 0" />
     <div ng-if="data.missionsList && data.missionsList.length > 0">
         <div class="panel panel-default" style="margin-bottom: 0;">
             <div class="panel-heading text-center"><b>Select a mission:</b> <button class="btn btn-sm btn-info" ng-click="data.selectMissionToggle = !data.selectMissionToggle;"><span ng-class="{true: 'glyphicon glyphicon-minus-sign', false: 'glyphicon glyphicon-plus-sign'}[!!data.selectMissionToggle]"></span></button></div>
