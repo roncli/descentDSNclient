@@ -17,8 +17,9 @@ var fs = require("fs"),
                 fs.writeFile("./settings.json", JSON.stringify(dsndata.settings), (err) => {
                     if (err) {
                         reject(err);
+                    } else {
+                        resolve();
                     }
-                    resolve();
                 });
             });
         });
